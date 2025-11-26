@@ -1,0 +1,2 @@
+# DotNetXtensions.Mini
+Mini DotNetXtensions :)
