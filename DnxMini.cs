@@ -1,9 +1,10 @@
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
-namespace DotNetXtensions.Mini;
+namespace DotNetXtensions;
 
-public static class DnxMini // single file!!
+public static class DnxMini
 {
 	#region --- Collection null/empty ---
 
@@ -211,6 +212,27 @@ public static class DnxMini // single file!!
 
 	#endregion
 
+	#region --- InRange / NotInRange ---
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static bool InRange<T>(this T val, T val1, T val2)
+		where T : INumber<T>, IComparisonOperators<T, T, bool>
+		=> val >= val1 && val <= val2;
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static bool NotInRange<T>(this T val, T val1, T val2)
+		where T : INumber<T>, IComparisonOperators<T, T, bool>
+		=> val < val1 || val > val2;
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static bool InRange(this string val, int val1, int val2)
+		=> val != null && val.Length.InRange(val1, val2);
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static bool NotInRange(this string val, int val1, int val2)
+		=> val != null && val.Length.NotInRange(val1, val2);
+
+	#endregion
 
 	#region --- Print ---
 
@@ -228,4 +250,24 @@ public static class DnxMini // single file!!
 		=> Console.Write(obj);
 
 	#endregion
+
+	#region --- JoinToString ---
+
+	[DebuggerStepThrough]
+	public static string JoinToString<T>(this IEnumerable<T> source, string separator = ",")
+		=> source == null ? null : string.Join(separator, source);
+
+	[DebuggerStepThrough]
+	public static string JoinToString<T>(this IEnumerable<T> source, Func<T, string> selector, string separator = ",")
+		=> source == null ? null : string.Join(separator, source.Select(selector));
+
+	#endregion
+
+	#region --- String ... ---
+
+	public static bool ContainsIgnoreCase(this string s, string value)
+		=> s != null && value != null && s.Contains(value, StringComparison.OrdinalIgnoreCase);
+
+	#endregion
+
 }
