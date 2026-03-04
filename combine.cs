@@ -1,5 +1,5 @@
 #!/usr/bin/env dotnet script
-#:package DotNetXtensions.Mini@1.0.0
+#:package DotNetXtensions.Mini@1.0.1-beta-1
 #nullable disable
 // #:property TargetFramework=net10.0
 
@@ -38,7 +38,6 @@ FileWClassName[] allFileClasses = [.. csFiles.Select(GetFileWClassName).Where(f 
 
 IGrouping<string, FileWClassName>[] grps = [.. allFileClasses.GroupBy(f => f.ClassName)];
 
-// GetFileWClassName
 WriteLine($"Found {csFiles.Length} .cs files to combine:");
 foreach(var file in csFiles) {
 	WriteLine($"  - {Path.GetFileName(file)}");
@@ -89,7 +88,7 @@ static FileWClassName GetFileWClassName(string file)
 
 	// Find the specific line containing the class declaration
 
-	string classLine = GetLines(csContent, trim: false, ignoreEmpty: true)
+	string classLine = csContent.GetLinesLazy(trim: false, ignoreEmpty: true)
 		.FirstOrDefault(line => line.Contains(" class "));
 
 	if(classLine == null)
@@ -103,7 +102,6 @@ static FileWClassName GetFileWClassName(string file)
 	if(className == null)
 		throw new Exception($"Class name couldn't be found in line: {classLine}");
 
-	string fNm = System.IO.Path.GetFileName(file);
 	FileWClassName obj = new(className, isPartial, file, csContent);
 	return obj;
 }
@@ -163,29 +161,7 @@ static string CombinePartialClasses(string className, FileWClassName[] files)
 	return sb.ToString();
 }
 
-static string[] GetLines(string s, bool trim = false, bool ignoreEmpty = false)
-{
-	if(string.IsNullOrEmpty(s)) return [];
-
-	StringSplitOptions options = StringSplitOptions.None;
-	if(ignoreEmpty) options |= StringSplitOptions.RemoveEmptyEntries;
-	if(trim) options |= StringSplitOptions.TrimEntries;
-
-	return s.Split(["\r\n", "\n", "\r"], options);
-}
-
 record FileWClassName(string ClassName, bool IsPartial, string Path, string Content)
 {
 	public string FileName { get; init; } = System.IO.Path.GetFileName(Path);
-
-	public string FileNameZ {
-		get {
-			string pth = Path;
-			string nm = System.IO.Path.GetFileName(pth);
-
-			$"get filename: nm: {nm} - from path: {pth}".Print();
-			return nm;
-		}
-	}
 }
-
