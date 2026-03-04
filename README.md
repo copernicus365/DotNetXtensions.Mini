@@ -2,7 +2,7 @@
 
 [![NuGet](https://img.shields.io/nuget/v/DotNetXtensions.Mini.svg)](https://www.nuget.org/packages/DotNetXtensions.Mini)
 
-A lightweight, streamlined version of [DotNetXtensions](https://github.com/copernicus365/DotNetXtensions) containing the most commonly used extension methods and utilities for .NET development. This mini version provides essential string, collection, character, date/time, and path manipulation utilities without the full library overhead. It is also possible to use the single file `DotNetXtensions.Mini.cs` directly in your project without needing to reference the NuGet package.
+A lightweight, streamlined version of [DotNetXtensions](https://github.com/copernicus365/DotNetXtensions) containing the most commonly used extension methods and utilities for .NET development. This mini version provides essential string, collection, character, date/time, and path manipulation utilities without the full library overhead. It is also possible to use the single file `DnxMini.cs` directly in your project without needing to reference the NuGet package.
 
 ## Installation
 
@@ -14,11 +14,11 @@ dotnet add package DotNetXtensions.Mini
 
 ## Use of `DnxMini.cs` single file
 
-You can also choose to include the `DnxMini.cs` file directly in your project without referencing the NuGet package. This allows you to use the extension methods without adding an external dependency.
+You can also choose to include the `DnxMini.cs` file directly in your project without referencing the NuGet package. This allows you to use the extension methods without adding an external dependency. Note: we build this with a project script that combines all .cs classes, as well as partial classes, into a single file, so you can just include that one file in your project.
 
 ### A note on partial classes
 
-For maintainability and for better testing, in some cases we internally have a number of separate partial classes (e.g. `XString_Nulle.cs`, `XString_ToValue.cs`, etc), even though they share the same class name: `partial class XString`. That said, note that when compiling, no artifacts of partial classes remain, and not that the nuget package is, of course, a compiled product of this source code, thus it has ZERO knowledge partials were ever used:
+For maintainability and for better testing, in some cases we internally have a number of separate partial classes (e.g. `XString_Nulle.cs`, `XString_ToValue.cs`, etc), even though they share the same class name: `partial class XString`. That said, note that when compiling, no artifacts of partial classes remain, and also note that the nuget package is, of course, a compiled product of this source code, thus it has ZERO knowledge that partials were ever used:
 
 > When you use partial classes in C#, the C# compiler merges all the partial declarations into one single class during compilation. After compilation, there is no trace left of the partial keyword or the fact that the class was split across files — in the resulting assembly (IL / metadata), it looks exactly like you had written one big, normal (non-partial) class from the beginning. - Grok (2026-03)
 
@@ -71,9 +71,107 @@ string nullStr = null;
 int length = nullStr.LengthN(-1); // -1 (default value)
 ```
 
+#### String Conversion / Parsing Extensions
+
+Convenient parsing methods with default values and null handling:
+
+**Standard conversions with defaults:**
+- **`ToInt()`** - Parse to int with default value on failure
+- **`ToLong()`** - Parse to long with default value
+- **`ToDecimal()`** - Parse to decimal with default value
+- **`ToDouble()`** - Parse to double with default value
+- **`ToBool()`** - Parse to bool (handles "0"/"1" as false/true)
+- **`ToDateTime()`** - Parse to DateTime with optional default
+- **`ToDateTimeOffset()`** - Parse to DateTimeOffset with optional default
+- **`ToGuid()`** - Parse to Guid with optional default
+
+**Nullable conversions (returns null on failure):**
+- **`ToIntN()`**, **`ToLongN()`**, **`ToDecimalN()`**, **`ToDoubleN()`**
+- **`ToBoolN()`**, **`ToDateTimeN()`**, **`ToDateTimeOffsetN()`**, **`ToGuidN()`**
+
+```csharp
+// With default values
+int num = "42".ToInt(); // 42
+
+string invalid = "abc";
+int num2 = invalid.ToInt(-1); // -1 (default)
+
+// Boolean parsing supports numeric strings
+string enabled = "1";
+bool isEnabled = enabled.ToBool(); // true
+```
+
+#### Advanced String Methods
+
+**`FirstNotNulle()`** - Returns first non-null/empty string from multiple inputs 🌟
+
+```csharp
+string config = null;
+string env = "";
+string fallback = "default";
+
+string result = config.FirstNotNulle(env, fallback); // "default"
+
+// Common use case: configuration fallback chain
+string apiKey = Environment.GetEnvironmentVariable("API_KEY")
+    .FirstNotNulle(config["ApiKey"], "dev-key-12345");
+```
+
+**`SubstringMax()`** - Safe substring with maximum length (won't throw on out of range) 🌟
+
+```csharp
+string text = "Hello World";
+
+// Traditional Substring would throw if length > remaining chars
+string result1 = text.SubstringMax(6, 100); // "World" (no exception)
+
+// With ellipsis for truncation
+string longText = "This is a very long string that needs truncating";
+string preview = longText.SubstringMax(20, "..."); // "This is a very long..."
+
+// Try to break on word boundaries
+string sentence = "The quick brown fox jumps over the lazy dog";
+string excerpt = sentence.SubstringMax(20, "...", tryBreakOnWord: true); 
+// "The quick brown..." (breaks at word boundary)
+```
+
+### Line Processing Extensions
+
+Efficient string splitting and enumeration by lines.
+
+#### Line Conversion and Splitting
+
+**`ToUnixLines()`** - Convert CRLF to LF line endings
+**`GetLines()`** - Split string into array of lines (very simple, based on `string.Split`)
+**`GetLinesLazy()`** - 🌟 Lazy enumeration with true deferred execution, with performant span based operations. 🌟 Perfect for LINQ operations - only processes lines that are actually consumed
+**`ForEachLine()`** - Very-fast iteration, based on .NET's vectorized/SIMD-optimized `SpanLineEnumerator` (.NET 9+), but unfortunately, that doesn't allow enumeration, thus `GetLinesLazy()` can't be based on this.
+
+```csharp
+// Process until condition met, then stop
+
+string logs = GetLargeLogFile();
+
+string errorLine = null;
+logs.ForEachLine(line => {
+    if (line.StartsWith("ERROR:")) {
+        errorLine = line;
+        return false; // Stop processing immediately
+    }
+    return true; // Continue to next line
+});
+```
+
+**Performance Guidance:**
+- Use `GetLines()` when you need all lines as an array
+- Use `GetLinesLazy()` for LINQ operations or when processing subset of lines
+- Use `ForEachLine()` (.NET 9+) for fastest sequential processing with early termination
+
 ### Collection Extensions
 
 #### Null/Empty Checks
+
+It's hard to live without these simple few extensions! Simplifies and makes for much more fluent code.
+
 - **`IsNulle()`** - 🌟🌟 Checks if collection/array is null or empty 🌟🌟
 - **`NotNulle()`** - 🌟🌟 Checks if collection has items 🌟🌟
 
@@ -201,11 +299,8 @@ bool equal2 = dict3.DictionariesAreEqual(dict4, (u1, u2) => u1.Name == u2.Name);
 
 ### Path Utilities (PathX)
 
-*TO INCLUDE or NOT to include... that is the question*
+Clean path manipulation that handles nulls gracefully and normalizes paths. All paths are automatically converted to use forward slashes (`/`) instead of backslashes for cross-platform consistency. 🌟
 
-Not sure if we will include this. I do however very frequently find myself needing this type of path manipulations.
-
-Clean path manipulation that handles nulls gracefully and normalizes paths:
 - 🌟🌟 **All paths are automatically converted to use forward slashes (`/`) instead of backslashes.** 🌟🌟 (throughout all the following)
 - **`CleanPath()`** - Normalizes path to use forward slashes and trims
 - **`GetFullPath()`** - Gets full path with null handling and cleaning
@@ -241,10 +336,12 @@ Many methods in this library are optimized for performance:
 - `[MethodImpl(MethodImplOptions.AggressiveInlining)]` for hot-path methods. This is key, especially for the string and character methods that are called frequently.
 - ASCII character methods use direct numeric comparisons instead of slower .NET methods
 - `TrimIfNeeded()` checks before allocating new strings
+- Line processing methods use efficient span-based operations and deferred execution where appropriate
 
-## Target Framework
+## Target Frameworks
 
-- .NET 8.0
+- .NET 8.0+
+- Some features target .NET 9.0+ (specifically `ForEachLine()`, which uses optimized span-based line enumeration)
 
 ## License
 

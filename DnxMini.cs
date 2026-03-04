@@ -497,36 +497,17 @@ public static class XNewLines
 }
 
 
-// ========== combined 7 partial files for: XString ==========
+// ========== combined 6 partial files for: XString ==========
 
 
 // ---
-// --- partial: XString_Contains.cs (0) ---
+// --- partial: XString_FirstNotNulle.cs (0) ---
 // ---
 
 
 public static partial class XString
 {
-	public static bool ContainsN(this string str, string value, StringComparison comparison)
-	{
-		if(str == null || value.IsNulle()) return false;
-		int idx = str.IndexOf(value, comparison);
-		return idx >= 0;
-	}
-
-	public static bool ContainsN(this string str, string value)
-		=> str != null && str.Contains(value);
-
-	public static bool ContainsIgnoreCase(this string s, string value)
-		=> s != null && value != null && s.Contains(value, StringComparison.OrdinalIgnoreCase);
-
-
-// ---
-// --- partial: XString_FirstNotNulle.cs (1) ---
-// ---
-
-
-/// <summary>
+	/// <summary>
 	/// Returns first input string that is not null or empty. If all are null or empty, returns null.
 	/// </summary>
 	/// <param name="value1">Value 1.</param>
@@ -550,7 +531,7 @@ public static partial class XString
 
 
 // ---
-// --- partial: XString_Nulle.cs (2) ---
+// --- partial: XString_Nulle.cs (1) ---
 // ---
 
 
@@ -583,7 +564,7 @@ public static partial class XString
 
 
 // ---
-// --- partial: XString_Print.cs (3) ---
+// --- partial: XString_Print.cs (2) ---
 // ---
 
 
@@ -602,7 +583,7 @@ public static partial class XString
 
 
 // ---
-// --- partial: XString_SubstringMax.cs (4) ---
+// --- partial: XString_SubstringMax.cs (3) ---
 // ---
 
 
@@ -676,7 +657,7 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 
 
 // ---
-// --- partial: XString_ToValue.cs (5) ---
+// --- partial: XString_ToValue.cs (4) ---
 // ---
 
 
@@ -769,7 +750,7 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 
 
 // ---
-// --- partial: XString_Trim.cs (6) ---
+// --- partial: XString_Trim.cs (5) ---
 // ---
 
 
