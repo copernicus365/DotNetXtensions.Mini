@@ -1,0 +1,10 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "combine",
+      "type": "shell",
+      "command": "dotnet run combine.cs"
+    }
+  ]
+}

@@ -1,7 +1,5 @@
 namespace DotNetXtensions;
 
-// TO INCLUDE or NOT to include... that is the question
-
 /// <summary>Cleans up paths to use forward slashes, handles nulls gracefully, usually trims.</summary>
 public static class PathX
 {

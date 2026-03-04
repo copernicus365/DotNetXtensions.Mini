@@ -12,6 +12,16 @@ Add the NuGet package to your project:
 dotnet add package DotNetXtensions.Mini
 ```
 
+## Use of `DnxMini.cs` single file
+
+You can also choose to include the `DnxMini.cs` file directly in your project without referencing the NuGet package. This allows you to use the extension methods without adding an external dependency.
+
+### A note on partial classes
+
+For maintainability and for better testing, in some cases we internally have a number of separate partial classes (e.g. `XString_Nulle.cs`, `XString_ToValue.cs`, etc), even though they share the same class name: `partial class XString`. That said, note that when compiling, no artifacts of partial classes remain, and not that the nuget package is, of course, a compiled product of this source code, thus it has ZERO knowledge partials were ever used:
+
+> When you use partial classes in C#, the C# compiler merges all the partial declarations into one single class during compilation. After compilation, there is no trace left of the partial keyword or the fact that the class was split across files — in the resulting assembly (IL / metadata), it looks exactly like you had written one big, normal (non-partial) class from the beginning. - Grok (2026-03)
+
 ## Features
 
 ### String Extensions
