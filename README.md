@@ -22,6 +22,26 @@ For maintainability and for better testing, in some cases we internally have a n
 
 > When you use partial classes in C#, the C# compiler merges all the partial declarations into one single class during compilation. After compilation, there is no trace left of the partial keyword or the fact that the class was split across files — in the resulting assembly (IL / metadata), it looks exactly like you had written one big, normal (non-partial) class from the beginning. - Grok (2026-03)
 
+## Design Philosophy
+
+### Graceful Null Handling
+
+**DotNetXtensions** adopts a consistent design philosophy of gracefully handling nulls rather than throwing exceptions. This is a deliberate choice that makes the library particularly well-suited for:
+
+- **Functional/Fluent Chaining** - No need for defensive null-checks at every step in a LINQ chain
+- **Railway-Oriented Programming** - Nulls flow through pipelines without derailing them
+- **Practical Utility** - For display, logging, and transformation scenarios where exceptions would add ceremony without value
+
+```csharp
+// Graceful null handling enables clean, chainable code:
+string display = items?.Where(x => x.IsValid).JoinToString(", ") ?? "(none)";
+
+// Instead of:
+string display2 = items != null ? string.Join(", ", items.Where(x => x.IsValid)) : "(none)";
+```
+
+This philosophy is applied consistently throughout the library - extension methods on strings, collections, and other types typically return `null` or a default value when given `null` input, rather than throwing `ArgumentNullException`.
+
 ## Features
 
 ### String Extensions
@@ -187,17 +207,21 @@ if (items.NotNulle()) // true
 
 #### Collection Utilities
 - **`CountN()`** / **`LengthN()`** - Returns count/length or default value if null
-- **`JoinToString()`** - Joins collection elements into string with separator 🌟
+- **`JoinToString()`** - 🌟 Joins collection elements into a string with separator 🌟
+
+- On `JoinToString()`, while .NET provides `string.Join()` as a static method, `JoinToString()` offers a fluent, chainable alternative that integrates seamlessly into LINQ pipelines.
 
 ```csharp
-List<int> numbers = null;
-int count = numbers.CountN(); // 0
-
+// Basic usage with default separator (comma)
 var names = new[] { "Alice", "Bob", "Charlie" };
 string joined = names.JoinToString(); // "Alice,Bob,Charlie"
 
-var users = new[] { new User("Alice"), new User("Bob") };
-string userNames = users.JoinToString(u => u.Name, "; "); // "Alice; Bob"
+// Custom separator
+string withSemicolon = names.JoinToString("; "); // "Alice; Bob; Charlie"
+
+// With selector - transform items inline
+var users = new[] { new User("Alice", 25), new User("Bob", 30) };
+string userNames = users.JoinToString(u => u.Name?.ToUpper(), "; "); // "ALICE; BOB"
 ```
 
 ### Character Extensions
@@ -280,6 +304,47 @@ DateTimeOffset dto = DateTimeOffset.Now;
 DateTimeOffset rounded2 = dto.RoundToNearest(TimeSpan.FromMinutes(5));
 ```
 
+### Conditional LINQ Extensions
+
+Methods for conditionally applying LINQ operations, perfect for building dynamic queries and avoiding if-else chains.
+
+- **`WhereIf()`** - 🌟 Applies Where filter only if condition is true 🌟
+- **`WhereIfElse()`** - Applies one of two Where filters based on condition
+- **`SkipIf()`** / **`TakeIf()`** - Conditionally skip or take elements
+- **`SkipTakeIf()`** - Conditionally skip and take elements (pagination)
+
+```csharp
+// Build dynamic query without if-else chains
+var query = users
+    .WhereIf(filterByAge, u => u.Age >= 18)
+    .WhereIf(filterByActive, u => u.IsActive)
+    .TakeIf(limitResults, 100);
+
+// Conditional pagination
+var results = items.SkipTakeIf(paginationEnabled, skip: 20, count: 10);
+```
+
+### Null-Safe Collection Utilities
+
+Extensions for graceful handling of null collections and values.
+
+- **`EmptyIfNull()`** - 🌟 Returns empty collection/array/string if null 🌟
+- **`ValueOrDefault()`** - Gets value from nullable or default
+- **`NullIfDefault()`** - Returns null if value equals default
+
+```csharp
+// Avoid null reference exceptions in chains
+int[] nullArray = null;
+int count = nullArray.EmptyIfNull().Length; // 0 (no exception)
+
+string nullStr = null;
+string safe = nullStr.EmptyIfNull(); // "" (empty string)
+
+// Work with nullables
+int? maybeValue = null;
+int value = maybeValue.ValueOrDefault(42); // 42
+```
+
 ### Dictionary Extensions
 
 #### Comparison
@@ -349,8 +414,6 @@ MIT
 
 ## Relationship to DotNetXtensions
 
-This is a mini version of the older, but more comprehensive [DotNetXtensions](https://github.com/copernicus365/DotNetXtensions) library. I have found over the years, that for many projects, I only need a subset of the full library's features. Also that one maybe bloated on some parts, I'm striving to keep this lean. Still keeping this 'alpha' while we work out the best set of methods to include (early 2026)
-
-## Contributing
+This is an updated, .NET Core only version of the older, but currently more comprehensive [DotNetXtensions](https://github.com/copernicus365/DotNetXtensions) library. Yet the gap is decreasing, as I add back core extensions. But I'm improving them as we go, and I fully intend to keep this a leaner and meaner DotNetXtensions, filtering out many things that were more niche, or bad decisions, etc.
 
 Issues and pull requests are welcome at the [GitHub repository](https://github.com/copernicus365/DotNetXtensions.Mini).

@@ -223,39 +223,194 @@ public static partial class XDictionary
 }
 
 
-// ========== combined 3 partial files for: XLinq ==========
+// ========== combined 4 partial files for: XLinq ==========
 
 
 // ---
-// --- partial: XLinq_Count.cs (0) ---
+// --- partial: XLinq_Empty.cs (0) ---
 // ---
 
 
 public static partial class XLinq
 {
+	/// <summary>Returns a new instance if null, else returns the object.</summary>
 	[DebuggerStepThrough]
-	public static int LengthN<T>(this T[] arr, int defaultVal = 0)
-		=> arr == null ? defaultVal : arr.Length;
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static T EmptyIfNull<T>(this T t) where T : class, new()
+		=> t ?? new T();
 
+	/// <summary>Returns an empty string if null, else returns the string.</summary>
 	[DebuggerStepThrough]
-	public static int LengthN(this string s, int defaultVal = 0)
-		=> s == null ? defaultVal : s.Length;
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static string EmptyIfNull(this string s)
+		=> s ?? "";
 
+	/// <summary>Returns an empty array if null, else returns the array.</summary>
 	[DebuggerStepThrough]
-	public static int CountN(this string s, int defaultVal = 0)
-		=> s == null ? defaultVal : s.Length;
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static T[] EmptyIfNull<T>(this T[] array)
+		=> array ?? [];
 
+	/// <summary>Returns an empty collection if null, else returns the collection.</summary>
 	[DebuggerStepThrough]
-	public static int CountN<T>(this IList<T> list, int defaultVal = 0)
-		=> list == null ? defaultVal : list.Count;
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> enumerable)
+		=> enumerable ?? [];
 
+	// ---
+
+	/// <summary>Gets the value or default if null. Alias for GetValueOrDefault</summary>
 	[DebuggerStepThrough]
-	public static int CountN<T>(this ICollection<T> coll, int defaultVal = 0)
-		=> coll == null ? defaultVal : coll.Count;
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static T ValueOrDefault<T>(this T? t) where T : struct
+		=> t.GetValueOrDefault();
+
+	/// <summary>Gets the value or the input default value if null. Alias for GetValueOrDefault</summary>
+	[DebuggerStepThrough]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static T ValueOrDefault<T>(this T? t, T defaultValue) where T : struct
+		=> t.GetValueOrDefault(defaultValue);
+
+	// ---
+
+	/// <summary>Returns null if the value equals default, else returns the value.</summary>
+	[DebuggerStepThrough]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static T? NullIfDefault<T>(this T t) where T : struct
+		=> t.Equals(default(T)) ? null : t;
+
+
+	// ---
+
+	/// <summary>Returns the length, or default if null.</summary>
+	[DebuggerStepThrough]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int LengthN<T>(this T[] arr, int defaultValue = 0)
+		=> arr == null ? defaultValue : arr.Length;
+
+	/// <summary>Returns the length, or default if null.</summary>
+	[DebuggerStepThrough]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int LengthN(this string s, int defaultValue = 0)
+		=> s == null ? defaultValue : s.Length;
+
+	/// <summary>Returns the count, or default if null.</summary>
+	[DebuggerStepThrough]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int CountN<T>(this IList<T> list, int defaultValue = 0)
+		=> list == null ? defaultValue : list.Count;
+
+	/// <summary>Returns the count, or default if null.</summary>
+	[DebuggerStepThrough]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int CountN<T>(this ICollection<T> coll, int defaultValue = 0)
+		=> coll == null ? defaultValue : coll.Count;
+
+	/// <summary>Returns the count, or default if null.</summary>
+	[DebuggerStepThrough]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int CountN<T>(this IReadOnlyCollection<T> coll, int defaultValue = 0)
+		=> coll == null ? defaultValue : coll.Count;
+
+	/// <summary>Returns the count, or default if null.</summary>
+	[DebuggerStepThrough]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int CountN<T>(this IReadOnlyList<T> list, int defaultValue = 0)
+		=> list == null ? defaultValue : list.Count;
 
 
 // ---
-// --- partial: XLinq_IsNulle.cs (1) ---
+// --- partial: XLinq_IfLinq.cs (1) ---
+// ---
+
+
+// --- WhereIf ---
+
+	/// <summary>Applies Where filter if condition is true.</summary>
+	[DebuggerStepThrough]
+	public static IEnumerable<T> WhereIf<T>(this IEnumerable<T> source, bool condition, Func<T, bool> predicate)
+		=> !condition ? source : source?.Where(predicate);
+
+	/// <summary>Applies indexed Where filter if condition is true.</summary>
+	[DebuggerStepThrough]
+	public static IEnumerable<T> WhereIf<T>(this IEnumerable<T> source, bool condition, Func<T, int, bool> predicate)
+		=> !condition ? source : source?.Where(predicate);
+
+	/// <summary>Applies Where filter if condition is true.</summary>
+	[DebuggerStepThrough]
+	public static IQueryable<T> WhereIf<T>(this IQueryable<T> source, bool condition, Expression<Func<T, bool>> predicate)
+		=> !condition ? source : source?.Where(predicate);
+
+	/// <summary>Applies indexed Where filter if condition is true.</summary>
+	[DebuggerStepThrough]
+	public static IQueryable<T> WhereIf<T>(this IQueryable<T> source, bool condition, Expression<Func<T, int, bool>> predicate)
+		=> !condition ? source : source?.Where(predicate);
+
+
+	// --- WhereIfElse ---
+
+	/// <summary>Applies one of two Where filters based on condition.</summary>
+	[DebuggerStepThrough]
+	public static IEnumerable<T> WhereIfElse<T>(this IEnumerable<T> source, bool condition, Func<T, bool> predicateIf, Func<T, bool> predicateElse)
+		=> condition ? source?.Where(predicateIf) : source?.Where(predicateElse);
+
+	/// <summary>Applies one of two indexed Where filters based on condition.</summary>
+	[DebuggerStepThrough]
+	public static IEnumerable<T> WhereIfElse<T>(this IEnumerable<T> source, bool condition, Func<T, int, bool> predicateIf, Func<T, int, bool> predicateElse)
+		=> condition ? source?.Where(predicateIf) : source?.Where(predicateElse);
+
+	/// <summary>Applies one of two Where filters based on condition.</summary>
+	[DebuggerStepThrough]
+	public static IQueryable<T> WhereIfElse<T>(this IQueryable<T> source, bool condition, Expression<Func<T, bool>> predicateIf, Expression<Func<T, bool>> predicateElse)
+		=> condition ? source?.Where(predicateIf) : source?.Where(predicateElse);
+
+	/// <summary>Applies one of two indexed Where filters based on condition.</summary>
+	[DebuggerStepThrough]
+	public static IQueryable<T> WhereIfElse<T>(this IQueryable<T> source, bool condition, Expression<Func<T, int, bool>> predicateIf, Expression<Func<T, int, bool>> predicateElse)
+		=> condition ? source?.Where(predicateIf) : source?.Where(predicateElse);
+
+
+	// --- SkipIf ---
+
+	/// <summary>Skips elements if condition is true.</summary>
+	[DebuggerStepThrough]
+	public static IEnumerable<T> SkipIf<T>(this IEnumerable<T> source, bool condition, int count)
+		=> !condition ? source : source?.Skip(count);
+
+	/// <summary>Skips elements if condition is true.</summary>
+	[DebuggerStepThrough]
+	public static IQueryable<T> SkipIf<T>(this IQueryable<T> source, bool condition, int count)
+		=> !condition ? source : source?.Skip(count);
+
+
+	// --- TakeIf ---
+
+	/// <summary>Takes elements if condition is true.</summary>
+	[DebuggerStepThrough]
+	public static IEnumerable<T> TakeIf<T>(this IEnumerable<T> source, bool condition, int count)
+		=> !condition ? source : source?.Take(count);
+
+	/// <summary>Takes elements if condition is true.</summary>
+	[DebuggerStepThrough]
+	public static IQueryable<T> TakeIf<T>(this IQueryable<T> source, bool condition, int count)
+		=> !condition ? source : source?.Take(count);
+
+
+	// --- SkipTakeIf ---
+
+	/// <summary>Skips then takes elements if condition is true.</summary>
+	[DebuggerStepThrough]
+	public static IEnumerable<T> SkipTakeIf<T>(this IEnumerable<T> source, bool condition, int skip, int count)
+		=> !condition ? source : source?.Skip(skip).Take(count);
+
+	/// <summary>Skips then takes elements if condition is true.</summary>
+	[DebuggerStepThrough]
+	public static IQueryable<T> SkipTakeIf<T>(this IQueryable<T> source, bool condition, int skip, int count)
+		=> !condition ? source : source?.Skip(skip).Take(count);
+
+
+// ---
+// --- partial: XLinq_IsNulle.cs (2) ---
 // ---
 
 
@@ -279,7 +434,7 @@ public static partial class XLinq
 
 
 // ---
-// --- partial: XLinq_JoinToString.cs (2) ---
+// --- partial: XLinq_JoinToString.cs (3) ---
 // ---
 
 
