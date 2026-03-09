@@ -3,7 +3,6 @@ namespace DotNetXtensions;
 public static partial class XString
 {
 	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static string NullIfEmptyTrimmed(this string s)
 	{
 		s = s.TrimIfNeeded();
@@ -11,7 +10,6 @@ public static partial class XString
 	}
 
 	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsTrimmable(this string s)
 	{
 		if(s == null || s.Length < 1)
@@ -24,7 +22,6 @@ public static partial class XString
 	/// </summary>
 	/// <param name="s">String</param>
 	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool TrimIfNeeded(ref string s)
 	{
 		if(s.IsTrimmable()) {
@@ -39,7 +36,6 @@ public static partial class XString
 	/// </summary>
 	/// <param name="s">String</param>
 	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static string TrimIfNeeded(this string s)
 	{
 		if(s.IsTrimmable())

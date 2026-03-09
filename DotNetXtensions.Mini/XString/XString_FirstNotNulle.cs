@@ -9,7 +9,6 @@ public static partial class XString
 	/// <param name="value2">Value 2.</param>
 	/// <param name="value3">Value 3.</param>
 	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static string FirstNotNulle(this string value1, string value2, string value3 = null)
 	{
 		if(value1 != null && value1.Length > 0)
