@@ -304,6 +304,60 @@ DateTimeOffset dto = DateTimeOffset.Now;
 DateTimeOffset rounded2 = dto.RoundToNearest(TimeSpan.FromMinutes(5));
 ```
 
+### DateTimeOffset Offset Conversions
+
+Extensions for converting `DateTimeOffset` and `DateTime` values between different timezone offsets. These methods fill framework gaps and bypass `DateTime.Kind` restrictions that often cause issues with deserialized or external timestamps.
+
+#### ToOffsetSameUtc - Change Offset, Preserve UTC Instant
+
+**`ToOffsetSameUtc()`** - 🌟 Changes the offset while keeping the same UTC instant 🌟
+
+```csharp
+// Start with 3:00 PM +05:00 (UTC: 10:00 AM)
+var dt = new DateTimeOffset(2024, 1, 15, 15, 0, 0, TimeSpan.FromHours(5));
+
+// Change to Pacific time offset (-08:00), UTC stays 10:00 AM
+var result = dt.ToOffsetSameUtc(TimeSpan.FromHours(-8));
+// Result: 2024-01-15 02:00 AM -08:00 (UTC still 10:00 AM)
+
+// Works with TimeZoneInfo too
+var estTime = dt.ToOffsetSameUtc(TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"));
+// Result: 2024-01-15 05:00 AM -05:00 (UTC still 10:00 AM)
+```
+
+**Note:** Framework's `DateTimeOffset.ToOffset()` behaves the same way - it preserves UTC time. `ToOffsetSameUtc` provides a `TimeZoneInfo` overload that the framework lacks.
+
+#### DateTime to DateTimeOffset Conversions
+
+Convert `DateTime` to `DateTimeOffset` with explicit control over interpretation. **Importantly, these methods ignore `DateTime.Kind`**, bypassing framework limitations that throw exceptions when `Kind` doesn't match expectations.
+
+**`ToDateTimeOffset()`** - Treats DateTime as local time, preserves ticks
+
+```csharp
+// DateTime represents 2:00 PM in some timezone
+var dt = new DateTime(2024, 1, 15, 14, 0, 0);
+
+// Create DateTimeOffset treating it as Pacific time
+var result = dt.ToDateTimeOffset(TimeSpan.FromHours(-8));
+// Result: 2024-01-15 2:00 PM -08:00 (UTC: 10:00 PM)
+```
+
+**`ToDateTimeOffsetFromUtc()`** - Treats DateTime as UTC, adjusts local time by offset
+
+```csharp
+// DateTime represents 10:00 AM UTC (from database, API, etc.)
+var utcTime = new DateTime(2024, 1, 15, 10, 0, 0);
+
+// Convert to Eastern time representation
+var result = utcTime.ToDateTimeOffsetFromUtc(TimeSpan.FromHours(-5));
+// Result: 2024-01-15 5:00 AM -05:00 (UTC: 10:00 AM)
+
+// Works with TimeZoneInfo
+var est = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+var result2 = utcTime.ToDateTimeOffsetFromUtc(est);
+// Result: 2024-01-15 5:00 AM -05:00
+```
+
 ### Conditional LINQ Extensions
 
 Methods for conditionally applying LINQ operations, perfect for building dynamic queries and avoiding if-else chains.
