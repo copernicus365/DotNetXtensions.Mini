@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <VersionPrefix>1.0.1</VersionPrefix>
-    <VersionSuffix>beta-2</VersionSuffix>
+    <VersionSuffix>beta-3</VersionSuffix>
 
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
