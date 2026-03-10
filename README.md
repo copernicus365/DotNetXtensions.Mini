@@ -282,10 +282,11 @@ if (name.InRange(1, 50)) // true (checks length)
 
 #### Rounding Methods
 Round DateTime and DateTimeOffset to nearest intervals:
-- **`Round()`** - Rounds to nearest interval
+- **`Round()`** - Rounds to nearest interval (midpoint rounds up)
 - **`RoundUp()`** - Always rounds up to next interval
 - **`RoundDown()`** - Always rounds down to previous interval
-- **`RoundToNearest()`** - Rounds to nearest interval
+
+Preserves `DateTime.Kind` and `DateTimeOffset.Offset`. Uses integer arithmetic for precise midpoint handling.
 
 ```csharp
 DateTime dt = new DateTime(2024, 1, 15, 10, 37, 0);
@@ -301,7 +302,7 @@ DateTime roundedDown = dt.RoundDown(TimeSpan.FromHours(1)); // 10:00:00
 
 // Works with DateTimeOffset too
 DateTimeOffset dto = DateTimeOffset.Now;
-DateTimeOffset rounded2 = dto.RoundToNearest(TimeSpan.FromMinutes(5));
+DateTimeOffset rounded2 = dto.Round(TimeSpan.FromMinutes(5));
 ```
 
 ### DateTimeOffset Offset Conversions
