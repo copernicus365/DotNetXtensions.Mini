@@ -101,45 +101,234 @@ public static class XChar
 }
 
 
-// ========== from file: XDateTimes_Round.cs ==========
+// ========== combined 3 partial files for: XDateTimes ==========
 
-public static class XDateTimes
+
+// ---
+// --- partial: XDateTimes_EpochOSConversions.cs (0) ---
+// ---
+
+
+public static partial class XDateTimes
 {
-	// --- ROUND DATE/TIME ---
+	/// <summary>
+	/// The .NET tick value at Unix Epoch (1970-01-01 00:00:00 UTC).
+	/// Equivalent to <see cref="DateTime.UnixEpoch"/>.Ticks, but as a compile-time constant.
+	/// </summary>
+	public const long TicksAtUnixEpoch = 621355968000000000L;
+
+
+	/// <summary>
+	/// Converts Unix time milliseconds to .NET ticks.
+	/// Similar to <see cref="DateTimeOffset.FromUnixTimeMilliseconds"/> but returns ticks directly without object allocation.
+	/// </summary>
+	/// <param name="value">Unix time in milliseconds since Epoch (1970-01-01 00:00:00 UTC).</param>
+	public static long UnixTimeMillisecondsToTicks(this long value)
+		=> TicksAtUnixEpoch + (value * 10000);
+
+	/// <summary>
+	/// Converts Unix time seconds to .NET ticks.
+	/// Similar to <see cref="DateTimeOffset.FromUnixTimeSeconds"/> but returns ticks directly without object allocation.
+	/// </summary>
+	/// <param name="value">Unix time in seconds since Epoch (1970-01-01 00:00:00 UTC).</param>
+	public static long UnixTimeSecondsToTicks(this long value)
+		=> TicksAtUnixEpoch + (value * 10000000);
+
+
+	/// <summary>
+	/// Converts Unix time milliseconds to <see cref="DateTimeOffset"/>.
+	/// Enables fluent conversion from <see cref="long"/> Unix timestamps received from APIs.
+	/// </summary>
+	/// <param name="value">Unix time in milliseconds since Epoch (1970-01-01 00:00:00 UTC).</param>
+	/// <param name="offset">Time zone offset. If null, UTC (TimeSpan.Zero) is used.</param>
+	public static DateTimeOffset UnixTimeMillisecondsToDateTimeOffset(this long value, TimeSpan? offset = null)
+		=> new(value.UnixTimeMillisecondsToTicks(), offset ?? TimeSpan.Zero);
+
+	/// <summary>
+	/// Converts Unix time seconds to <see cref="DateTimeOffset"/>.
+	/// Enables fluent conversion from <see cref="long"/> Unix timestamps received from APIs.
+	/// </summary>
+	/// <param name="value">Unix time in seconds since Epoch (1970-01-01 00:00:00 UTC).</param>
+	/// <param name="offset">Time zone offset. If null, UTC (TimeSpan.Zero) is used.</param>
+	public static DateTimeOffset UnixTimeSecondsToDateTimeOffset(this long value, TimeSpan? offset = null)
+		=> new(value.UnixTimeSecondsToTicks(), offset ?? TimeSpan.Zero);
+
+
+// ---
+// --- partial: XDateTimes_OffsetConversions.cs (1) ---
+// ---
+
+
+/// <summary>
+	/// Convenience overload for converting to a new offset based on TimeZoneInfo.
+	/// Equivalent to <c>dt.ToOffset(tzi.GetUtcOffset(dt))</c>.
+	/// </summary>
+	public static DateTimeOffset ToOffset(this DateTimeOffset dt, TimeZoneInfo tzi)
+		=> dt.ToOffset(tzi.GetUtcOffset(dt));
+
+	/// <summary>
+	/// Converts to a new offset while representing the same moment in time (same UTC).
+	/// The existing offset is discarded, and the local DateTime adjusts to the new offset.
+	/// In a sense, is the opposite of <c>dt.ToOffset()</c>.
+	/// </summary>
+	public static DateTimeOffset ToOffsetSameUtc(this DateTimeOffset dt, TimeZoneInfo tzi)
+		=> __convertOffsetDTO_UTCFixed(dt, tzi.GetUtcOffset(dt));
+
+	/// <summary>
+	/// Converts to a new offset while representing the same moment in time (same UTC).
+	/// The existing offset is discarded, and the local DateTime adjusts to the new offset.
+	/// In a sense, is the opposite of <c>dt.ToOffset()</c>.
+	/// </summary>
+	public static DateTimeOffset ToOffsetSameUtc(this DateTimeOffset dt, TimeSpan offset)
+		=> __convertOffsetDTO_UTCFixed(dt, offset);
+
+
+
+	static DateTimeOffset __convertOffsetDTO_UTCFixed(DateTimeOffset dt, TimeSpan offset)
+	{
+		if(dt == DateTimeOffset.MinValue)
+			return DateTimeOffset.MinValue;
+
+		AssertDateTZOffsetInRange(offset);
+
+		long ticks = dt.UtcDateTime.Ticks + offset.Ticks;
+		if(ticks <= 0)
+			return DateTimeOffset.MinValue;
+
+		if(ticks > _maxDTTicks)
+			return DateTimeOffset.MaxValue;
+
+		DateTimeOffset val = new(ticks, offset);
+		return val;
+	}
+
+
+	/// <summary>
+	/// Converts DateTime to DateTimeOffset, treating input as local time at the input offset.
+	/// The DateTime ticks are preserved. DateTime.Kind is ignored.
+	/// </summary>
+	public static DateTimeOffset ToDateTimeOffset(this DateTime dt, TimeSpan offset)
+		=> __ToDateTimeOffset(dt, offset, isUtc: false);
+
+	/// <summary>
+	/// Converts DateTime to DateTimeOffset, treating input as local time at the given timezone.
+	/// The DateTime ticks are preserved. DateTime.Kind is ignored.
+	/// </summary>
+	public static DateTimeOffset ToDateTimeOffset(this DateTime dt, TimeZoneInfo tzi)
+		=> __ToDateTimeOffset(dt, tzi.GetUtcOffset(dt.ToUnspecifiedKindIfUtc()), isUtc: false);
+
+	/// <summary>
+	/// Converts DateTime to DateTimeOffset, treating input as UTC time. The local DateTime
+	/// in the result is adjusted by the offset. DateTime.Kind is ignored.
+	/// </summary>
+	public static DateTimeOffset ToDateTimeOffsetFromUtc(this DateTime dt, TimeSpan offset)
+		=> __ToDateTimeOffset(dt, offset, isUtc: true);
+
+	/// <summary>
+	/// Converts DateTime to DateTimeOffset, treating input as UTC time. The local DateTime
+	/// in the result is adjusted by the timezone offset. DateTime.Kind is ignored.
+	/// </summary>
+	public static DateTimeOffset ToDateTimeOffsetFromUtc(this DateTime dt, TimeZoneInfo tzi)
+		=> __ToDateTimeOffset(dt, tzi.GetUtcOffset(dt.ToUnspecifiedKindIfUtc()), isUtc: true);
+
+
+	/// <summary>
+	/// Converts input DateTime to a new DateTimeOffset with the specified Offset value. 
+	/// Importantly, the Kind property on the input DateTime *is ignored* 
+	/// (the framework unfortunately throws an exception if <c>dt.Kind == DateTimeKind.Utc</c>).
+	/// Set the <paramref name="isUtc"/> value to true (default is true) to indicate input DateTime is
+	/// already UTC time, or false to be treated as a local time (any non-UTC time).
+	/// </summary>
+	/// <param name="dt">DateTime</param>
+	/// <param name="offset">Offset</param>
+	/// <param name="isUtc">Indicates if the input DateTime is already a UTC value 
+	/// or else a Local value (any time that is not UTC).</param>
+	static DateTimeOffset __ToDateTimeOffset(DateTime dt, TimeSpan offset, bool isUtc = true)
+	{
+		if(dt == DateTime.MinValue)
+			return DateTimeOffset.MinValue;
+
+		AssertDateTZOffsetInRange(offset);
+
+		// convert with Ticks, bypass the framework's ugly exception on DateTime.Kind when not as expected
+		long ticks = isUtc
+			? dt.Ticks + offset.Ticks // dt is UTC, must convert to LOCAL time
+			: dt.Ticks; // dt is ALREADY local time, no change
+
+		if(ticks <= 0)
+			return DateTimeOffset.MinValue;
+
+		if(ticks > _maxDTTicks)
+			return DateTimeOffset.MaxValue;
+
+		DateTimeOffset val = new(ticks, offset);
+		return val;
+	}
+
+	/// <summary>
+	/// Converts DateTime.Kind to Unspecified if it was UTC, otherwise returns unchanged.
+	/// Useful for bypassing framework exceptions when DateTime.Kind conflicts with intended usage.
+	/// </summary>
+	public static DateTime ToUnspecifiedKindIfUtc(this DateTime dt)
+		=> dt.Kind != DateTimeKind.Utc ? dt : new DateTime(dt.Ticks, DateTimeKind.Unspecified);
+
+
+
+	static void AssertDateTZOffsetInRange(TimeSpan offset)
+	{
+		if(offset.NotInRange(_utcOffsetMin, _utcOffsetMax))
+			throw new ArgumentOutOfRangeException(nameof(offset));
+	}
+
+	static readonly TimeSpan _utcOffsetMin = TimeSpan.FromHours(-14);
+	static readonly TimeSpan _utcOffsetMax = TimeSpan.FromHours(14);
+	static readonly long _maxDTTicks = DateTimeOffset.MaxValue.Ticks;
+
+
+// ---
+// --- partial: XDateTimes_Round.cs (2) ---
+// ---
+
+
+// http://stackoverflow.com/questions/7029353/how-can-i-round-up-the-time-to-the-nearest-x-minutes
+
+	// --- Round ---
 
 	/// <summary>
 	/// Rounds the DateTime to the nearest specified interval.
+	/// Values at the exact midpoint are rounded up.
 	/// <para/>
 	/// Thanks to DevSal on http://stackoverflow.com/questions/7029353/c-sharp-round-up-time-to-nearest-x-minutes.
 	/// </summary>
 	/// <param name="dt">DateTime to round.</param>
 	/// <param name="roundBy">TimeSpan to round to.</param>
 	public static DateTime Round(this DateTime dt, TimeSpan roundBy)
-		=> new DateTime(_RoundTicks(roundBy, dt.Ticks));
+	{
+		bool roundUp = _roundUp(dt.Ticks, roundBy);
+		return roundUp ? dt.RoundUp(roundBy) : dt.RoundDown(roundBy);
+	}
 
 	/// <summary>
 	/// Rounds the DateTimeOffset to the nearest specified interval.
+	/// Values at the exact midpoint are rounded up.
 	/// <para/>
 	/// Thanks to DevSal on http://stackoverflow.com/questions/7029353/c-sharp-round-up-time-to-nearest-x-minutes.
 	/// </summary>
-	/// <param name="dt">DateTime to round.</param>
+	/// <param name="dt">DateTimeOffset to round.</param>
 	/// <param name="roundBy">TimeSpan to round to.</param>
 	public static DateTimeOffset Round(this DateTimeOffset dt, TimeSpan roundBy)
-		=> new DateTimeOffset(_RoundTicks(roundBy, dt.Ticks), dt.Offset);
-
-	static long _RoundTicks(TimeSpan roundBy, long dtTicks)
 	{
-		long roundTicks = roundBy.Ticks;
-		int f = 0;
-		double m = (double)(dtTicks % roundTicks) / roundTicks;
-		if(m >= 0.5)
-			f = 1;
-		long val = ((dtTicks / roundTicks) + f) * roundTicks;
-		return val;
+		bool roundUp = _roundUp(dt.Ticks, roundBy);
+		return roundUp ? dt.RoundUp(roundBy) : dt.RoundDown(roundBy);
 	}
 
+	static bool _roundUp(long ticks, TimeSpan roundBy)
+	{
+		long delta = ticks % roundBy.Ticks;
+		return (delta * 2) >= roundBy.Ticks;
+	}
 
-	// http://stackoverflow.com/questions/7029353/how-can-i-round-up-the-time-to-the-nearest-x-minutes
+	// --- RoundUp ---
 
 	public static DateTime RoundUp(this DateTime dt, TimeSpan d)
 	{
@@ -153,7 +342,7 @@ public static class XDateTimes
 		return new DateTimeOffset(dt.Ticks + delta, dt.Offset);
 	}
 
-
+	// --- RoundDown ---
 
 	public static DateTime RoundDown(this DateTime dt, TimeSpan d)
 	{
@@ -167,21 +356,6 @@ public static class XDateTimes
 		return new DateTimeOffset(dt.Ticks - delta, dt.Offset);
 	}
 
-
-
-	public static DateTime RoundToNearest(this DateTime dt, TimeSpan d)
-	{
-		long delta = dt.Ticks % d.Ticks;
-		bool roundUp = delta > d.Ticks / 2;
-		return roundUp ? dt.RoundUp(d) : dt.RoundDown(d);
-	}
-
-	public static DateTimeOffset RoundToNearest(this DateTimeOffset dt, TimeSpan d)
-	{
-		long delta = dt.Ticks % d.Ticks;
-		bool roundUp = delta > d.Ticks / 2;
-		return roundUp ? dt.RoundUp(d) : dt.RoundDown(d);
-	}
 }
 
 
@@ -466,12 +640,38 @@ public static partial class XNumber
 		=> val < val1 || val > val2;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static bool InRange(this string val, int val1, int val2)
+	public static bool LengthInRange(this string val, int val1, int val2)
 		=> val != null && val.Length.InRange(val1, val2);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static bool NotInRange(this string val, int val1, int val2)
+	public static bool LengthNotInRange(this string val, int val1, int val2)
 		=> val != null && val.Length.NotInRange(val1, val2);
+
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static bool InRange(this TimeSpan val, TimeSpan val1, TimeSpan val2)
+		=> val >= val1 && val <= val2;
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static bool NotInRange(this TimeSpan val, TimeSpan val1, TimeSpan val2)
+		=> val < val1 || val > val2;
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static bool InRange(this DateTime val, DateTime val1, DateTime val2)
+		=> val >= val1 && val <= val2;
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static bool NotInRange(this DateTime val, DateTime val1, DateTime val2)
+		=> val < val1 || val > val2;
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static bool InRange(this DateTimeOffset val, DateTimeOffset val1, DateTimeOffset val2)
+		=> val >= val1 && val <= val2;
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static bool NotInRange(this DateTimeOffset val, DateTimeOffset val1, DateTimeOffset val2)
+		=> val < val1 || val > val2;
+
 }
 
 
@@ -669,7 +869,6 @@ public static partial class XString
 	/// <param name="value2">Value 2.</param>
 	/// <param name="value3">Value 3.</param>
 	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static string FirstNotNulle(this string value1, string value2, string value3 = null)
 	{
 		if(value1 != null && value1.Length > 0)
@@ -910,7 +1109,6 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 
 
 [DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static string NullIfEmptyTrimmed(this string s)
 	{
 		s = s.TrimIfNeeded();
@@ -918,7 +1116,6 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 	}
 
 	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsTrimmable(this string s)
 	{
 		if(s == null || s.Length < 1)
@@ -931,7 +1128,6 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 	/// </summary>
 	/// <param name="s">String</param>
 	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool TrimIfNeeded(ref string s)
 	{
 		if(s.IsTrimmable()) {
@@ -946,7 +1142,6 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 	/// </summary>
 	/// <param name="s">String</param>
 	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static string TrimIfNeeded(this string s)
 	{
 		if(s.IsTrimmable())
