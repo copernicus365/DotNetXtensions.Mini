@@ -16,13 +16,17 @@ public static partial class XLinq
 		/// <summary>Returns the length, or 0 if null.</summary>
 		public int LengthN => s == null ? 0 : s.Length;
 
-		/// <summary>Returns true if null or empty.</summary>
+		/// <summary>Returns true if null *or* empty. Null-safe</summary>
+		/// <remarks>Consider this an abbreviated as well as extension form of `string.IsNullOrEmpty`</remarks>
 		public bool IsEmpty => s == null || s.Length == 0;
 
-		/// <summary>Returns true if not null and not empty.</summary>
+		/// <summary>Returns true if *not* null or empty. Null-safe</summary>
+		/// <remarks>Consider this an abbreviated as well as extension form of `!string.IsNullOrEmpty`</remarks>
 		public bool NotEmpty => s != null && s.Length != 0;
 
 		/// <summary>Returns true if null or whitespace.</summary>
+		/// <remarks>static string function `string.IsNullOrWhiteSpace`, unfortunately makes it impossible
+		/// to use the same `IsNullOrWhiteSpace` name as an extension property. Thus the inverted name here: IsEmptyOrWhiteSpace</remarks>
 		public bool IsEmptyOrWhiteSpace => string.IsNullOrWhiteSpace(s);
 
 		/// <summary>Returns the first non-null/empty string among the receiver and up to two additional inputs. Returns null if all are null or empty.</summary>
@@ -44,16 +48,18 @@ public static partial class XLinq
 		/// <summary>Returns the length, or 0 if null.</summary>
 		public int LengthN => arr == null ? 0 : arr.Length;
 
-		/// <summary>Returns true if null or empty.</summary>
+		/// <summary>Returns true if array is null *or* empty. Null-safe check.</summary>
+		/// <remarks>Abbreviated name for `IsNullOrEmpty`</remarks>
 		public bool IsEmpty => arr == null || arr.Length < 1;
 
-		/// <summary>Returns true if null or empty.</summary>
+		/// <summary>Returns true if array is null or empty.</summary>
 		public bool IsNullOrEmpty => arr == null || arr.Length < 1;
 
-		/// <summary>Returns true if not null and not empty.</summary>
+		/// <summary>Returns true if array is not null or empty.</summary>
+		/// <remarks>Abbreviated name for `NotNullOrEmpty`</remarks>
 		public bool NotEmpty => arr != null && arr.Length > 0;
 
-		/// <summary>Returns true if not null and not empty.</summary>
+		/// <summary>Returns true if array is not null or empty.</summary>
 		public bool NotNullOrEmpty => arr != null && arr.Length > 0;
 	}
 
