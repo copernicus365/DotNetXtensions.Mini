@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks> -->
     <VersionPrefix>1.0.1</VersionPrefix>
-    <VersionSuffix>beta-3</VersionSuffix>
+    <VersionSuffix>beta-4</VersionSuffix>
 
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
