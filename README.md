@@ -75,12 +75,12 @@ string input = "  ";
 if(input.IsEmptyOrWhiteSpace) // true
     WriteLine("Whitespace only");
 
-string result = "".NullIfEmpty;  // null
+string result = "".NullIfEmpty;      // null
 string safe   = nullStr.EmptyIfNull; // ""
 ```
 
 #### String Trimming
-- **`IsTrimmable`** - `true` if the string has leading or trailing whitespace (property, no `()`)
+- **`IsTrimmable`** - `true` if the string has leading or trailing whitespace
 - **`TrimIfNeeded()`** - Trims only if needed; returns the **same string reference** when no trim is required
 - **`TrimToNull()`** - 🌟 Trims, then returns null if the result is empty 🌟
 - **`TrimN()`** - Trims if not null, returns null otherwise
@@ -90,7 +90,7 @@ string text = "  hello  ";
 string trimmed = text.TrimIfNeeded(); // "hello"
 
 string text2 = "hello";
-bool needsTrim = text2.IsTrimmable; // false — property, no ()
+bool needsTrim = text2.IsTrimmable; // false
 
 string padded = "   ";
 string result = padded.TrimToNull(); // null (trimmed to empty → null)
@@ -211,12 +211,12 @@ It's hard to live without these simple few extensions! Simplifies and makes for 
 
 - **`IsEmpty`** - 🌟🌟 `true` if collection/array is null or empty 🌟🌟
 - **`NotEmpty`** - 🌟🌟 `true` if collection has items 🌟🌟
-- **`IsNullOrEmpty`** - alias for `IsEmpty` (available on arrays and `ICollection<T>`)
-- **`NotNullOrEmpty`** - alias for `NotEmpty` (available on arrays and `ICollection<T>`)
+- **`IsNullOrEmpty`** - fuller alias for `IsEmpty` (available on arrays and `ICollection<T>`)
+- **`NotNullOrEmpty`** - fuller alias for `NotEmpty` (available on arrays and `ICollection<T>`)
 
 ```csharp
 List<int> numbers = new();
-if (numbers.IsEmpty)  // true — property, no ()
+if (numbers.IsEmpty)  // true
     WriteLine("No numbers");
 
 int[] items = { 1, 2, 3 };
