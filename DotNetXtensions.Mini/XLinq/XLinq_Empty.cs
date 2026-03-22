@@ -48,19 +48,19 @@ public static partial class XLinq
 		public int LengthN => arr == null ? 0 : arr.Length;
 
 		/// <summary>Returns true if null or empty. Null-safe.</summary>
-		/// <remarks>Short form of <see cref="IsNullOrEmpty"/>.</remarks>
+		/// <remarks>Short form of <c>IsNullOrEmpty</c>.</remarks>
 		public bool IsEmpty => arr == null || arr.Length < 1;
 
 		/// <summary>Returns true if null or empty.</summary>
-		/// <remarks>Full-name alias for <see cref="IsEmpty"/>.</remarks>
+		/// <remarks>Full-name alias for <c>IsEmpty</c>.</remarks>
 		public bool IsNullOrEmpty => arr == null || arr.Length < 1;
 
 		/// <summary>Returns true if not null and not empty. Null-safe.</summary>
-		/// <remarks>Short form of <see cref="NotNullOrEmpty"/>.</remarks>
+		/// <remarks>Short form of <c>NotNullOrEmpty</c>.</remarks>
 		public bool NotEmpty => arr != null && arr.Length > 0;
 
 		/// <summary>Returns true if not null and not empty.</summary>
-		/// <remarks>Full-name alias for <see cref="NotEmpty"/>.</remarks>
+		/// <remarks>Full-name alias for <c>NotEmpty</c>.</remarks>
 		public bool NotNullOrEmpty => arr != null && arr.Length > 0;
 	}
 
@@ -95,19 +95,19 @@ public static partial class XLinq
 		public int CountN => coll == null ? 0 : coll.Count;
 
 		/// <summary>Returns true if null or empty. Null-safe.</summary>
-		/// <remarks>Short form of <see cref="IsNullOrEmpty"/>.</remarks>
+		/// <remarks>Short form of <c>IsNullOrEmpty</c>.</remarks>
 		public bool IsEmpty => coll == null || coll.Count < 1;
 
 		/// <summary>Returns true if null or empty.</summary>
-		/// <remarks>Full-name alias for <see cref="IsEmpty"/>.</remarks>
+		/// <remarks>Full-name alias for <c>IsEmpty</c>.</remarks>
 		public bool IsNullOrEmpty => coll == null || coll.Count < 1;
 
 		/// <summary>Returns true if not null and not empty. Null-safe.</summary>
-		/// <remarks>Short form of <see cref="NotNullOrEmpty"/>.</remarks>
+		/// <remarks>Short form of <c>NotNullOrEmpty</c>.</remarks>
 		public bool NotEmpty => coll != null && coll.Count > 0;
 
 		/// <summary>Returns true if not null and not empty.</summary>
-		/// <remarks>Full-name alias for <see cref="NotEmpty"/>.</remarks>
+		/// <remarks>Full-name alias for <c>NotEmpty</c>.</remarks>
 		public bool NotNullOrEmpty => coll != null && coll.Count > 0;
 	}
 
