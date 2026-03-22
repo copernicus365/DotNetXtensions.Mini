@@ -4,6 +4,10 @@
 
 A lightweight, streamlined version of [DotNetXtensions](https://github.com/copernicus365/DotNetXtensions) containing the most commonly used extension methods and utilities for .NET development. This mini version provides essential string, collection, character, date/time, and path manipulation utilities without the full library overhead. It is also possible to use the single file `DnxMini.cs` directly in your project without needing to reference the NuGet package.
 
+## Requirements
+
+**.NET 10.0** — This library targets .NET 10 exclusively, due to the copious use of **C# 14 extension properties**. Thank you .NET for these!
+
 ## Installation
 
 Add the NuGet package to your project:
@@ -18,7 +22,7 @@ You can also choose to include the `DnxMini.cs` file directly in your project wi
 
 ### A note on partial classes
 
-For maintainability and for better testing, in some cases we internally have a number of separate partial classes (e.g. `XString_Nulle.cs`, `XString_ToValue.cs`, etc), even though they share the same class name: `partial class XString`. That said, note that when compiling, no artifacts of partial classes remain, and also note that the nuget package is, of course, a compiled product of this source code, thus it has ZERO knowledge that partials were ever used:
+For maintainability and for better testing, in some cases we internally have a number of separate partial classes (e.g. `XString_Trim.cs`, `XString_ToValue.cs`, etc), even though they share the same class name: `partial class XString`. That said, note that when compiling, no artifacts of partial classes remain, and also note that the nuget package is, of course, a compiled product of this source code, thus it has ZERO knowledge that partials were ever used:
 
 > When you use partial classes in C#, the C# compiler merges all the partial declarations into one single class during compilation. After compilation, there is no trace left of the partial keyword or the fact that the class was split across files — in the resulting assembly (IL / metadata), it looks exactly like you had written one big, normal (non-partial) class from the beginning. - Grok (2026-03)
 
@@ -40,55 +44,68 @@ string display = items?.Where(x => x.IsValid).JoinToString(", ") ?? "(none)";
 string display2 = items != null ? string.Join(", ", items.Where(x => x.IsValid)) : "(none)";
 ```
 
-This philosophy is applied consistently throughout the library - extension methods on strings, collections, and other types typically return `null` or a default value when given `null` input, rather than throwing `ArgumentNullException`.
+This philosophy is applied consistently throughout the library — extension members on strings, collections, and other types typically return `null` or a default value when given `null` input, rather than throwing `ArgumentNullException`.
+
+### C# 14 Extension Properties
+
+Members that check or transform the receiver without additional arguments are exposed as **extension properties** — no parentheses needed. Boolean state tests like `IsEmpty` and `NotEmpty` read exactly like instance properties, consistent with how .NET itself exposes state (`task.IsCompleted`, `token.IsCancellationRequested`). Methods remain methods when they accept arguments.
 
 ## Features
 
 ### String Extensions
 
-Unfortunately, EVEN in 2026 (!), .NET still lacks extension methods for extremely common string operations, the most famous of all: `IsNullOrEmpty`. Now perhaps the most controversial naming decision on my part is embracing in this almost singular case, an abbreviated name: `IsNulle()` and `NotNulle()`. If that bugs you, I hope you can forgive it! Feel free to use the non-abbreviated version: `IsNullOrEmpty()`.
-
 #### Null/Empty Checks
-- **`IsNulle()`** - 🌟 Checks if string is null or empty (faster than built-in methods) 🌟
-- **`NotNulle()`** - 🌟 Checks if string is NOT null or empty 🌟
-- **`IsNullOrEmpty()`** - 🌟 Alias for standard null/empty check 🌟
-- **`IsNullOrWhiteSpace()`** - Extension wrapper for `string.IsNullOrWhiteSpace`
-- **`NullIfEmpty()`** - 🌟 Returns null if string is empty, otherwise returns the string 🌟
+- **`IsEmpty`** - 🌟 `true` if null or empty 🌟
+- **`NotEmpty`** - 🌟 `true` if not null and not empty 🌟
+- **`IsEmptyOrWhiteSpace`** - `true` if null or whitespace
+- **`EmptyIfNull`** - Returns `""` if null, otherwise returns the string
+- **`NullIfEmpty`** - 🌟 Returns null if empty, otherwise returns the string 🌟
+- **`NullIfWhitespace`** - Returns null if null or whitespace, otherwise returns the string
 
 ```csharp
 string str = "";
-if (str.IsNulle()) // true
+if(str.IsEmpty)              // true — property, no `()`
     WriteLine("Empty or null");
 
 string name = "John";
-if (name.NotNulle()) // true
+if(name.NotEmpty)            // true
     WriteLine($"Hello {name}");
+
+string input = "  ";
+if(input.IsEmptyOrWhiteSpace) // true
+    WriteLine("Whitespace only");
+
+string result = "".NullIfEmpty;  // null
+string safe   = nullStr.EmptyIfNull; // ""
 ```
 
 #### String Trimming
-- **`TrimIfNeeded()`** - Only trims if whitespace exists at start/end. More efficient, returns the same string when not.
-- **`IsTrimmable()`** - Checks if string has leading/trailing whitespace
-- **`TrimN()`** - Trims if not null, returns null otherwise.
-- **`NullIfEmptyTrimmed()`** - 🌟 Trims and returns null if result is empty. This is another STAR that appears prolifically. 🌟
+- **`IsTrimmable`** - `true` if the string has leading or trailing whitespace (property, no `()`)
+- **`TrimIfNeeded()`** - Trims only if needed; returns the **same string reference** when no trim is required
+- **`TrimToNull()`** - 🌟 Trims, then returns null if the result is empty 🌟
+- **`TrimN()`** - Trims if not null, returns null otherwise
 
 ```csharp
 string text = "  hello  ";
 string trimmed = text.TrimIfNeeded(); // "hello"
 
 string text2 = "hello";
-bool needsTrim = text2.IsTrimmable(); // false (no trimming needed)
+bool needsTrim = text2.IsTrimmable; // false — property, no ()
+
+string padded = "   ";
+string result = padded.TrimToNull(); // null (trimmed to empty → null)
 ```
 
 #### String Utilities
 - **`ContainsIgnoreCase()`** - Case-insensitive contains check
-- **`LengthN()`** / **`CountN()`** - Returns length or default value if null
+- **`LengthN`** / **`CountN`** - Returns length/count or 0 if null (properties)
 
 ```csharp
 string str = "Hello World";
 bool contains = str.ContainsIgnoreCase("WORLD"); // true
 
 string nullStr = null;
-int length = nullStr.LengthN(-1); // -1 (default value)
+int length = nullStr.LengthN; // 0
 ```
 
 #### String Conversion / Parsing Extensions
@@ -123,18 +140,18 @@ bool isEnabled = enabled.ToBool(); // true
 
 #### Advanced String Methods
 
-**`FirstNotNulle()`** - Returns first non-null/empty string from multiple inputs 🌟
+**`FirstNotNullOrEmpty()`** - Returns first non-null/empty string from the receiver and up to two additional inputs 🌟
 
 ```csharp
 string config = null;
 string env = "";
 string fallback = "default";
 
-string result = config.FirstNotNulle(env, fallback); // "default"
+string result = config.FirstNotNullOrEmpty(env, fallback); // "default"
 
 // Common use case: configuration fallback chain
 string apiKey = Environment.GetEnvironmentVariable("API_KEY")
-    .FirstNotNulle(config["ApiKey"], "dev-key-12345");
+    .FirstNotNullOrEmpty(config["ApiKey"], "dev-key-12345");
 ```
 
 **`SubstringMax()`** - Safe substring with maximum length (won't throw on out of range) 🌟
@@ -151,7 +168,7 @@ string preview = longText.SubstringMax(20, "..."); // "This is a very long..."
 
 // Try to break on word boundaries
 string sentence = "The quick brown fox jumps over the lazy dog";
-string excerpt = sentence.SubstringMax(20, "...", tryBreakOnWord: true); 
+string excerpt = sentence.SubstringMax(20, "...", tryBreakOnWord: true);
 // "The quick brown..." (breaks at word boundary)
 ```
 
@@ -192,21 +209,23 @@ logs.ForEachLine(line => {
 
 It's hard to live without these simple few extensions! Simplifies and makes for much more fluent code.
 
-- **`IsNulle()`** - 🌟🌟 Checks if collection/array is null or empty 🌟🌟
-- **`NotNulle()`** - 🌟🌟 Checks if collection has items 🌟🌟
+- **`IsEmpty`** - 🌟🌟 `true` if collection/array is null or empty 🌟🌟
+- **`NotEmpty`** - 🌟🌟 `true` if collection has items 🌟🌟
+- **`IsNullOrEmpty`** - alias for `IsEmpty` (available on arrays and `ICollection<T>`)
+- **`NotNullOrEmpty`** - alias for `NotEmpty` (available on arrays and `ICollection<T>`)
 
 ```csharp
 List<int> numbers = new();
-if (numbers.IsNulle()) // true
+if (numbers.IsEmpty)  // true — property, no ()
     WriteLine("No numbers");
 
 int[] items = { 1, 2, 3 };
-if (items.NotNulle()) // true
+if (items.NotEmpty)   // true
     WriteLine($"Has {items.Length} items");
 ```
 
 #### Collection Utilities
-- **`CountN()`** / **`LengthN()`** - Returns count/length or default value if null
+- **`CountN`** / **`LengthN`** - Returns count/length or 0 if null (properties)
 - **`JoinToString()`** - 🌟 Joins collection elements into a string with separator 🌟
 
 - On `JoinToString()`, while .NET provides `string.Join()` as a static method, `JoinToString()` offers a fluent, chainable alternative that integrates seamlessly into LINQ pipelines.
@@ -379,25 +398,38 @@ var query = users
 var results = items.SkipTakeIf(paginationEnabled, skip: 20, count: 10);
 ```
 
-### Null-Safe Collection Utilities
+### Null-Safe Collection and Value Utilities
 
-Extensions for graceful handling of null collections and values.
+Extensions for graceful handling of null collections and nullable values.
 
-- **`EmptyIfNull()`** - 🌟 Returns empty collection/array/string if null 🌟
-- **`ValueOrDefault()`** - Gets value from nullable or default
-- **`NullIfDefault()`** - Returns null if value equals default
+- **`EmptyIfNull`** - 🌟 Returns empty collection/array/string if null (property) 🌟
+- **`NullIfDefault`** - Returns null if a struct value equals its default
+- **`ValueIfDefault(v)`** - Returns `v` if value equals default, otherwise the original value
+- **`ValueOrDefault`** - Gets the value if not null, else `default(T)` (property)
+- **`ValueOr(alt)`** - Returns `alt` if null **or default** (treats both as "not set"), otherwise the value
 
 ```csharp
 // Avoid null reference exceptions in chains
 int[] nullArray = null;
-int count = nullArray.EmptyIfNull().Length; // 0 (no exception)
+int count = nullArray.EmptyIfNull.Length; // 0 (no exception)
 
 string nullStr = null;
-string safe = nullStr.EmptyIfNull(); // "" (empty string)
+string safe = nullStr.EmptyIfNull; // ""
 
-// Work with nullables
-int? maybeValue = null;
-int value = maybeValue.ValueOrDefault(42); // 42
+// Nullable<T> value helpers
+int? val = null;
+int a = val.ValueOrDefault;  // 0 (property)
+int b = val.ValueOr(42);     // 42
+
+int? zero = 0;
+int c = zero.ValueOr(42);    // 42 (0 == default, treated as "not set")
+
+int? five = 5;
+int d = five.ValueOr(42);    // 5
+
+// NullIfDefault on struct
+Guid empty = Guid.Empty;
+Guid? result = empty.NullIfDefault; // null
 ```
 
 ### Dictionary Extensions
@@ -429,7 +461,7 @@ Clean path manipulation that handles nulls gracefully and normalizes paths. All 
 
 
 ```csharp
-string path = PathX.CleanPath(@"C:\Users\Documents\"); 
+string path = PathX.CleanPath(@"C:\Users\Documents\");
 // Result: "C:/Users/Documents"
 
 string fullPath = PathX.GetFullPath("./file.txt");
@@ -455,13 +487,12 @@ obj.Print(); // Outputs object to console
 Many methods in this library are optimized for performance:
 - `[MethodImpl(MethodImplOptions.AggressiveInlining)]` for hot-path methods. This is key, especially for the string and character methods that are called frequently.
 - ASCII character methods use direct numeric comparisons instead of slower .NET methods
-- `TrimIfNeeded()` checks before allocating new strings
+- `TrimIfNeeded()` checks before allocating — returns the same string reference when no trim is required
 - Line processing methods use efficient span-based operations and deferred execution where appropriate
 
 ## Target Frameworks
 
-- .NET 8.0+
-- Some features target .NET 9.0+ (specifically `ForEachLine()`, which uses optimized span-based line enumeration)
+- .NET 10.0 (C# 14 required for extension properties)
 
 ## License
 
