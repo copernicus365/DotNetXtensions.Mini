@@ -10,26 +10,25 @@ public static partial class XLinq
 		/// <summary>Returns null if empty string, else returns the string.</summary>
 		public string NullIfEmpty => s == "" ? null : s;
 
-		/// <summary>Returns null if empty string, else returns the string.</summary>
+		/// <summary>Returns null if value is null, empty, or consists exclusively of white-space. Else returns the string.</summary>
 		public string NullIfWhitespace => string.IsNullOrWhiteSpace(s) ? null : s;
 
 		/// <summary>Returns the length, or 0 if null.</summary>
 		public int LengthN => s == null ? 0 : s.Length;
 
-		/// <summary>Returns true if null *or* empty. Null-safe</summary>
-		/// <remarks>Consider this an abbreviated as well as extension form of `string.IsNullOrEmpty`</remarks>
+		/// <summary>Returns true if null or empty. Null-safe.</summary>
+		/// <remarks>Extension-property form of the static <c>string.IsNullOrEmpty</c>.</remarks>
 		public bool IsEmpty => s == null || s.Length == 0;
 
-		/// <summary>Returns true if *not* null or empty. Null-safe</summary>
-		/// <remarks>Consider this an abbreviated as well as extension form of `!string.IsNullOrEmpty`</remarks>
+		/// <summary>Returns true if not null and not empty. Null-safe.</summary>
+		/// <remarks>Extension-property form of <c>!string.IsNullOrEmpty</c>.</remarks>
 		public bool NotEmpty => s != null && s.Length != 0;
 
-		/// <summary>Returns true if null or whitespace.</summary>
-		/// <remarks>static string function `string.IsNullOrWhiteSpace`, unfortunately makes it impossible
-		/// to use the same `IsNullOrWhiteSpace` name as an extension property. Thus the inverted name here: IsEmptyOrWhiteSpace</remarks>
+		/// <summary>Returns true if value is null, empty, or consists exclusively of white-space. Null-safe. This is an indirection call to <c>string.IsNullOrWhiteSpace</c></summary>
+		/// <remarks>Extension-property form of the static <c>string.IsNullOrWhiteSpace</c>. The inverted prefix avoids a name conflict with that static method.</remarks>
 		public bool IsEmptyOrWhiteSpace => string.IsNullOrWhiteSpace(s);
 
-		/// <summary>Returns the first non-null/empty string among the receiver and up to two additional inputs. Returns null if all are null or empty.</summary>
+		/// <summary>Returns the first non-null/empty string, checking up to two additional values. Returns null if all are null or empty.</summary>
 		[DebuggerStepThrough]
 		public string FirstNotNullOrEmpty(string value2, string value3 = null)
 		{
@@ -48,18 +47,20 @@ public static partial class XLinq
 		/// <summary>Returns the length, or 0 if null.</summary>
 		public int LengthN => arr == null ? 0 : arr.Length;
 
-		/// <summary>Returns true if array is null *or* empty. Null-safe check.</summary>
-		/// <remarks>Abbreviated name for `IsNullOrEmpty`</remarks>
+		/// <summary>Returns true if null or empty. Null-safe.</summary>
+		/// <remarks>Short form of <see cref="IsNullOrEmpty"/>.</remarks>
 		public bool IsEmpty => arr == null || arr.Length < 1;
 
-		/// <summary>Returns true if array is null or empty.</summary>
+		/// <summary>Returns true if null or empty.</summary>
+		/// <remarks>Full-name alias for <see cref="IsEmpty"/>.</remarks>
 		public bool IsNullOrEmpty => arr == null || arr.Length < 1;
 
-		/// <summary>Returns true if array is not null or empty.</summary>
-		/// <remarks>Abbreviated name for `NotNullOrEmpty`</remarks>
+		/// <summary>Returns true if not null and not empty. Null-safe.</summary>
+		/// <remarks>Short form of <see cref="NotNullOrEmpty"/>.</remarks>
 		public bool NotEmpty => arr != null && arr.Length > 0;
 
-		/// <summary>Returns true if array is not null or empty.</summary>
+		/// <summary>Returns true if not null and not empty.</summary>
+		/// <remarks>Full-name alias for <see cref="NotEmpty"/>.</remarks>
 		public bool NotNullOrEmpty => arr != null && arr.Length > 0;
 	}
 
@@ -93,16 +94,20 @@ public static partial class XLinq
 		/// <summary>Returns the count, or 0 if null.</summary>
 		public int CountN => coll == null ? 0 : coll.Count;
 
-		/// <summary>Returns true if null or empty.</summary>
+		/// <summary>Returns true if null or empty. Null-safe.</summary>
+		/// <remarks>Short form of <see cref="IsNullOrEmpty"/>.</remarks>
 		public bool IsEmpty => coll == null || coll.Count < 1;
 
 		/// <summary>Returns true if null or empty.</summary>
+		/// <remarks>Full-name alias for <see cref="IsEmpty"/>.</remarks>
 		public bool IsNullOrEmpty => coll == null || coll.Count < 1;
 
-		/// <summary>Returns true if not null and not empty.</summary>
+		/// <summary>Returns true if not null and not empty. Null-safe.</summary>
+		/// <remarks>Short form of <see cref="NotNullOrEmpty"/>.</remarks>
 		public bool NotEmpty => coll != null && coll.Count > 0;
 
 		/// <summary>Returns true if not null and not empty.</summary>
+		/// <remarks>Full-name alias for <see cref="NotEmpty"/>.</remarks>
 		public bool NotNullOrEmpty => coll != null && coll.Count > 0;
 	}
 
