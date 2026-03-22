@@ -2,72 +2,118 @@ namespace DotNetXtensions;
 
 public static partial class XLinq
 {
-	/// <summary>Returns a new instance if null, else returns the object.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static T EmptyIfNull<T>(this T t) where T : class, new()
-		=> t ?? new T();
+	extension(string s)
+	{
+		/// <summary>Returns an empty string if null, else returns the string.</summary>
+		public string EmptyIfNull => s ?? "";
 
-	/// <summary>Returns an empty string if null, else returns the string.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static string EmptyIfNull(this string s)
-		=> s ?? "";
+		/// <summary>Returns null if empty string, else returns the string.</summary>
+		public string NullIfEmpty => s == "" ? null : s;
 
-	/// <summary>Returns an empty array if null, else returns the array.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static T[] EmptyIfNull<T>(this T[] array)
-		=> array ?? [];
+		/// <summary>Returns null if empty string, else returns the string.</summary>
+		public string NullIfWhitespace => string.IsNullOrWhiteSpace(s) ? null : s;
 
-	/// <summary>Returns an empty collection if null, else returns the collection.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> enumerable)
-		=> enumerable ?? [];
+		/// <summary>Returns the length, or 0 if null.</summary>
+		public int LengthN => s == null ? 0 : s.Length;
 
-	// ---
+		/// <summary>Returns true if null or empty.</summary>
+		public bool IsEmpty => s == null || s.Length == 0;
 
-	/// <summary>Returns null if the value equals default, else returns the original value.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static T? NullIfDefault<T>(this T t) where T : struct
-		=> EqualityComparer<T>.Default.Equals(t, default) ? null : t;
+		/// <summary>Returns true if not null and not empty.</summary>
+		public bool NotEmpty => s != null && s.Length != 0;
 
-	/// <summary>Returns the specified value if the value equals default, else returns the original value.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static T ValueIfDefault<T>(this T t, T value) where T : struct
-		=> EqualityComparer<T>.Default.Equals(t, default) ? value : t;
+		/// <summary>Returns true if null or whitespace.</summary>
+		public bool IsEmptyOrWhiteSpace => string.IsNullOrWhiteSpace(s);
+	}
 
+	extension<T>(T[] arr)
+	{
+		/// <summary>Returns an empty array if null, else returns the array.</summary>
+		public T[] EmptyIfNull => arr ?? [];
 
-	// ---
+		/// <summary>Returns the length, or 0 if null.</summary>
+		public int LengthN => arr == null ? 0 : arr.Length;
 
-	/// <summary>Returns the length, or default if null.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static int LengthN<T>(this T[] arr, int defaultValue = 0)
-		=> arr == null ? defaultValue : arr.Length;
+		/// <summary>Returns true if null or empty.</summary>
+		public bool IsEmpty => arr == null || arr.Length < 1;
 
-	/// <summary>Returns the length, or default if null.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static int LengthN(this string s, int defaultValue = 0)
-		=> s == null ? defaultValue : s.Length;
+		/// <summary>Returns true if null or empty.</summary>
+		public bool IsNullOrEmpty => arr == null || arr.Length < 1;
 
-	/// <summary>Returns the count, or default if null.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static int CountN<T>(this IList<T> list, int defaultValue = 0)
-		=> list == null ? defaultValue : list.Count;
+		/// <summary>Returns true if not null and not empty.</summary>
+		public bool NotEmpty => arr != null && arr.Length > 0;
 
-	/// <summary>Returns the count, or default if null.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static int CountN<T>(this ICollection<T> coll, int defaultValue = 0)
-		=> coll == null ? defaultValue : coll.Count;
-	//
-	// Note: canNOT do IReadOnlyCollection<T> or IReadOnlyList<T> overloads, because IList<T> and ICollection<T> CONFLICT,
-	// making eg List<T> NOT work! All BCL concrete types that implement IReadOnlyCollection<T> and IReadOnlyList<T>, like
-	// ObservableCollection<T>, or ArraySegment<T>, also implement IList<T> and ICollection<T>.
+		/// <summary>Returns true if not null and not empty.</summary>
+		public bool NotNullOrEmpty => arr != null && arr.Length > 0;
+	}
+
+	extension<T>(IEnumerable<T> enumerable)
+	{
+		/// <summary>Returns an empty collection if null, else returns the collection.</summary>
+		public IEnumerable<T> EmptyIfNull => enumerable ?? [];
+	}
+
+	// NullIfDefault
+
+	extension<T>(T t) where T : struct
+	{
+		/// <summary>Returns null if the value equals default, else returns the original value.</summary>
+		public T? NullIfDefault => EqualityComparer<T>.Default.Equals(t, default) ? null : t;
+
+		/// <summary>Returns the specified value if the value equals default, else returns the original value.</summary>
+		public T ValueIfDefault(T value) => EqualityComparer<T>.Default.Equals(t, default) ? value : t;
+	}
+
+	// CountN
+
+	extension<T>(IList<T> list)
+	{
+		/// <summary>Returns the count, or 0 if null.</summary>
+		public int CountN => list == null ? 0 : list.Count;
+	}
+
+	extension<T>(ICollection<T> coll)
+	{
+		/// <summary>Returns the count, or 0 if null.</summary>
+		public int CountN => coll == null ? 0 : coll.Count;
+
+		/// <summary>Returns true if null or empty.</summary>
+		public bool IsEmpty => coll == null || coll.Count < 1;
+
+		/// <summary>Returns true if null or empty.</summary>
+		public bool IsNullOrEmpty => coll == null || coll.Count < 1;
+
+		/// <summary>Returns true if not null and not empty.</summary>
+		public bool NotEmpty => coll != null && coll.Count > 0;
+
+		/// <summary>Returns true if not null and not empty.</summary>
+		public bool NotNullOrEmpty => coll != null && coll.Count > 0;
+	}
+
+	extension<TValue>(TValue? value) where TValue : struct
+	{
+		/// <summary>Returns true if null or equals the default value.</summary>
+		public bool IsDefault => value == null || EqualityComparer<TValue>.Default.Equals(value.Value, default);
+
+		/// <summary>Returns true if null or equals the default value.</summary>
+		public bool IsNullOrDefault => value == null || EqualityComparer<TValue>.Default.Equals(value.Value, default);
+
+		/// <summary>Returns true if not null and not equal to the default value.</summary>
+		public bool NotDefault => value != null && !EqualityComparer<TValue>.Default.Equals(value.Value, default);
+
+		/// <summary>Returns true if not null and not equal to the default value.</summary>
+		public bool NotNullOrDefault => value != null && !EqualityComparer<TValue>.Default.Equals(value.Value, default);
+
+		/// <summary>Returns the value if not null, else default if null.</summary>
+		public TValue ValueOrDefault => value ?? default;
+
+		/// <summary>Returns the value if it is set (not null and not default), else returns input 'or' value.</summary>
+		public TValue ValueOr(TValue alt) => value == null || EqualityComparer<TValue>.Default.Equals(value.Value, default) ? alt : value.Value;
+	}
+
+	extension<T>(T t) where T : class, new()
+	{
+		/// <summary>Returns a new instance if null, else returns the object.</summary>
+		public T EmptyIfNull => t ?? new T();
+	}
 }
