@@ -28,25 +28,17 @@ public static partial class XLinq
 
 	// ---
 
-	/// <summary>Gets the value or default if null. Alias for GetValueOrDefault</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static T ValueOrDefault<T>(this T? t) where T : struct
-		=> t.GetValueOrDefault();
-
-	/// <summary>Gets the value or the input default value if null. Alias for GetValueOrDefault</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static T ValueOrDefault<T>(this T? t, T defaultValue) where T : struct
-		=> t.GetValueOrDefault(defaultValue);
-
-	// ---
-
-	/// <summary>Returns null if the value equals default, else returns the value.</summary>
+	/// <summary>Returns null if the value equals default, else returns the original value.</summary>
 	[DebuggerStepThrough]
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static T? NullIfDefault<T>(this T t) where T : struct
-		=> t.Equals(default(T)) ? null : t;
+		=> EqualityComparer<T>.Default.Equals(t, default) ? null : t;
+
+	/// <summary>Returns the specified value if the value equals default, else returns the original value.</summary>
+	[DebuggerStepThrough]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static T ValueIfDefault<T>(this T t, T value) where T : struct
+		=> EqualityComparer<T>.Default.Equals(t, default) ? value : t;
 
 
 	// ---
@@ -74,16 +66,8 @@ public static partial class XLinq
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int CountN<T>(this ICollection<T> coll, int defaultValue = 0)
 		=> coll == null ? defaultValue : coll.Count;
-
-	/// <summary>Returns the count, or default if null.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static int CountN<T>(this IReadOnlyCollection<T> coll, int defaultValue = 0)
-		=> coll == null ? defaultValue : coll.Count;
-
-	/// <summary>Returns the count, or default if null.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static int CountN<T>(this IReadOnlyList<T> list, int defaultValue = 0)
-		=> list == null ? defaultValue : list.Count;
+	//
+	// Note: canNOT do IReadOnlyCollection<T> or IReadOnlyList<T> overloads, because IList<T> and ICollection<T> CONFLICT,
+	// making eg List<T> NOT work! All BCL concrete types that implement IReadOnlyCollection<T> and IReadOnlyList<T>, like
+	// ObservableCollection<T>, or ArraySegment<T>, also implement IList<T> and ICollection<T>.
 }
