@@ -397,7 +397,7 @@ public static partial class XDictionary
 }
 
 
-// ========== combined 4 partial files for: XLinq ==========
+// ========== combined 3 partial files for: XLinq ==========
 
 
 // ---
@@ -407,90 +407,120 @@ public static partial class XDictionary
 
 public static partial class XLinq
 {
-	/// <summary>Returns a new instance if null, else returns the object.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static T EmptyIfNull<T>(this T t) where T : class, new()
-		=> t ?? new T();
+	extension(string s)
+	{
+		/// <summary>Returns an empty string if null, else returns the string.</summary>
+		public string EmptyIfNull => s ?? "";
 
-	/// <summary>Returns an empty string if null, else returns the string.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static string EmptyIfNull(this string s)
-		=> s ?? "";
+		/// <summary>Returns null if empty string, else returns the string.</summary>
+		public string NullIfEmpty => s == "" ? null : s;
 
-	/// <summary>Returns an empty array if null, else returns the array.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static T[] EmptyIfNull<T>(this T[] array)
-		=> array ?? [];
+		/// <summary>Returns null if empty string, else returns the string.</summary>
+		public string NullIfWhitespace => string.IsNullOrWhiteSpace(s) ? null : s;
 
-	/// <summary>Returns an empty collection if null, else returns the collection.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> enumerable)
-		=> enumerable ?? [];
+		/// <summary>Returns the length, or 0 if null.</summary>
+		public int LengthN => s == null ? 0 : s.Length;
 
-	// ---
+		/// <summary>Returns true if null or empty.</summary>
+		public bool IsEmpty => s == null || s.Length == 0;
 
-	/// <summary>Gets the value or default if null. Alias for GetValueOrDefault</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static T ValueOrDefault<T>(this T? t) where T : struct
-		=> t.GetValueOrDefault();
+		/// <summary>Returns true if not null and not empty.</summary>
+		public bool NotEmpty => s != null && s.Length != 0;
 
-	/// <summary>Gets the value or the input default value if null. Alias for GetValueOrDefault</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static T ValueOrDefault<T>(this T? t, T defaultValue) where T : struct
-		=> t.GetValueOrDefault(defaultValue);
+		/// <summary>Returns true if null or whitespace.</summary>
+		public bool IsEmptyOrWhiteSpace => string.IsNullOrWhiteSpace(s);
+	}
 
-	// ---
+	extension<T>(T[] arr)
+	{
+		/// <summary>Returns an empty array if null, else returns the array.</summary>
+		public T[] EmptyIfNull => arr ?? [];
 
-	/// <summary>Returns null if the value equals default, else returns the value.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static T? NullIfDefault<T>(this T t) where T : struct
-		=> t.Equals(default(T)) ? null : t;
+		/// <summary>Returns the length, or 0 if null.</summary>
+		public int LengthN => arr == null ? 0 : arr.Length;
 
+		/// <summary>Returns true if null or empty.</summary>
+		public bool IsEmpty => arr == null || arr.Length < 1;
 
-	// ---
+		/// <summary>Returns true if null or empty.</summary>
+		public bool IsNullOrEmpty => arr == null || arr.Length < 1;
 
-	/// <summary>Returns the length, or default if null.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static int LengthN<T>(this T[] arr, int defaultValue = 0)
-		=> arr == null ? defaultValue : arr.Length;
+		/// <summary>Returns true if not null and not empty.</summary>
+		public bool NotEmpty => arr != null && arr.Length > 0;
 
-	/// <summary>Returns the length, or default if null.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static int LengthN(this string s, int defaultValue = 0)
-		=> s == null ? defaultValue : s.Length;
+		/// <summary>Returns true if not null and not empty.</summary>
+		public bool NotNullOrEmpty => arr != null && arr.Length > 0;
+	}
 
-	/// <summary>Returns the count, or default if null.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static int CountN<T>(this IList<T> list, int defaultValue = 0)
-		=> list == null ? defaultValue : list.Count;
+	extension<T>(IEnumerable<T> enumerable)
+	{
+		/// <summary>Returns an empty collection if null, else returns the collection.</summary>
+		public IEnumerable<T> EmptyIfNull => enumerable ?? [];
+	}
 
-	/// <summary>Returns the count, or default if null.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static int CountN<T>(this ICollection<T> coll, int defaultValue = 0)
-		=> coll == null ? defaultValue : coll.Count;
+	// NullIfDefault
 
-	/// <summary>Returns the count, or default if null.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static int CountN<T>(this IReadOnlyCollection<T> coll, int defaultValue = 0)
-		=> coll == null ? defaultValue : coll.Count;
+	extension<T>(T t) where T : struct
+	{
+		/// <summary>Returns null if the value equals default, else returns the original value.</summary>
+		public T? NullIfDefault => EqualityComparer<T>.Default.Equals(t, default) ? null : t;
 
-	/// <summary>Returns the count, or default if null.</summary>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static int CountN<T>(this IReadOnlyList<T> list, int defaultValue = 0)
-		=> list == null ? defaultValue : list.Count;
+		/// <summary>Returns the specified value if the value equals default, else returns the original value.</summary>
+		public T ValueIfDefault(T value) => EqualityComparer<T>.Default.Equals(t, default) ? value : t;
+	}
+
+	// CountN
+
+	extension<T>(IList<T> list)
+	{
+		/// <summary>Returns the count, or 0 if null.</summary>
+		public int CountN => list == null ? 0 : list.Count;
+	}
+
+	extension<T>(ICollection<T> coll)
+	{
+		/// <summary>Returns the count, or 0 if null.</summary>
+		public int CountN => coll == null ? 0 : coll.Count;
+
+		/// <summary>Returns true if null or empty.</summary>
+		public bool IsEmpty => coll == null || coll.Count < 1;
+
+		/// <summary>Returns true if null or empty.</summary>
+		public bool IsNullOrEmpty => coll == null || coll.Count < 1;
+
+		/// <summary>Returns true if not null and not empty.</summary>
+		public bool NotEmpty => coll != null && coll.Count > 0;
+
+		/// <summary>Returns true if not null and not empty.</summary>
+		public bool NotNullOrEmpty => coll != null && coll.Count > 0;
+	}
+
+	extension<TValue>(TValue? value) where TValue : struct
+	{
+		/// <summary>Returns true if null or equals the default value.</summary>
+		public bool IsDefault => value == null || EqualityComparer<TValue>.Default.Equals(value.Value, default);
+
+		/// <summary>Returns true if null or equals the default value.</summary>
+		public bool IsNullOrDefault => value == null || EqualityComparer<TValue>.Default.Equals(value.Value, default);
+
+		/// <summary>Returns true if not null and not equal to the default value.</summary>
+		public bool NotDefault => value != null && !EqualityComparer<TValue>.Default.Equals(value.Value, default);
+
+		/// <summary>Returns true if not null and not equal to the default value.</summary>
+		public bool NotNullOrDefault => value != null && !EqualityComparer<TValue>.Default.Equals(value.Value, default);
+
+		/// <summary>Returns the value if not null, else default if null.</summary>
+		public TValue ValueOrDefault => value ?? default;
+
+		/// <summary>Returns the value if it is set (not null and not default), else returns input 'or' value.</summary>
+		public TValue ValueOr(TValue alt) => value == null || EqualityComparer<TValue>.Default.Equals(value.Value, default) ? alt : value.Value;
+	}
+
+	extension<T>(T t) where T : class, new()
+	{
+		/// <summary>Returns a new instance if null, else returns the object.</summary>
+		public T EmptyIfNull => t ?? new T();
+	}
 
 
 // ---
@@ -584,31 +614,7 @@ public static partial class XLinq
 
 
 // ---
-// --- partial: XLinq_IsNulle.cs (2) ---
-// ---
-
-
-[DebuggerStepThrough]
-	public static bool IsNulle<TSource>(this TSource[] source)
-		=> source == null || source.Length < 1;
-
-	[DebuggerStepThrough]
-	public static bool IsNulle<TSource>(this ICollection<TSource> source)
-		=> source == null || source.Count < 1;
-
-	[DebuggerStepThrough]
-	public static bool NotNulle<TSource>(this ICollection<TSource> source)
-		=> source != null && source.Count > 0;
-
-	public static bool IsNulle<TValue>(this Nullable<TValue> value) where TValue : struct
-		=> value == null || value.Value.Equals(default(TValue));
-
-	public static bool NotNulle<TValue>(this Nullable<TValue> value) where TValue : struct
-		=> !IsNulle(value);
-
-
-// ---
-// --- partial: XLinq_JoinToString.cs (3) ---
+// --- partial: XLinq_JoinToString.cs (2) ---
 // ---
 
 
@@ -695,7 +701,7 @@ public static class XNewLines
 	/// string if null, empty, or if <paramref name="ifNeeded"/> is true and no '\r' found.</returns>
 	public static string ToUnixLines(this string s, bool ifNeeded = false)
 	{
-		if(s.IsNulle())
+		if(s.IsEmpty)
 			return s;
 
 		if(ifNeeded && s.IndexOf('\r') < 0)
@@ -717,7 +723,7 @@ public static class XNewLines
 	/// <returns>Array of lines. Returns empty if null or empty input.</returns>
 	public static string[] GetLines(this string s, bool trim = false, bool ignoreEmpty = false, bool unixOnly = false)
 	{
-		if(s.IsNulle())
+		if(s.IsEmpty)
 			return [];
 
 		StringSplitOptions options = StringSplitOptions.None;
@@ -744,7 +750,7 @@ public static class XNewLines
 	/// <returns>Lazy enumerable of lines. Call .ToArray() if you need all lines materialized upfront.</returns>
 	public static IEnumerable<string> GetLinesLazy(this string s, bool trim = false, bool ignoreEmpty = false, bool unixOnly = false)
 	{
-		if(s.IsNulle())
+		if(s.IsEmpty)
 			yield break;
 
 		int pos = 0;
@@ -834,7 +840,7 @@ public static class XNewLines
 	/// </example>
 	public static void ForEachLine(this string s, Func<string, bool> act, bool trim = false, bool ignoreEmpty = false)
 	{
-		if(s.IsNulle())
+		if(s.IsEmpty)
 			return;
 
 		foreach(var line in s.AsSpan().EnumerateLines()) {
@@ -852,7 +858,7 @@ public static class XNewLines
 }
 
 
-// ========== combined 6 partial files for: XString ==========
+// ========== combined 5 partial files for: XString ==========
 
 
 // ---
@@ -885,40 +891,7 @@ public static partial class XString
 
 
 // ---
-// --- partial: XString_Nulle.cs (1) ---
-// ---
-
-
-// --- string null/empty ---
-
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static bool IsNulle(this string str)
-		=> str == null || str.Length == 0;
-
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static bool NotNulle(this string str)
-		=> str != null && str.Length != 0;
-
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static bool IsNullOrEmpty(this string str)
-		=> str == null || str.Length == 0;
-
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static bool IsNullOrWhiteSpace(this string str)
-		=> string.IsNullOrWhiteSpace(str);
-
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static string NullIfEmpty(this string s)
-		=> s == "" ? null : s;
-
-
-// ---
-// --- partial: XString_Print.cs (2) ---
+// --- partial: XString_Print.cs (1) ---
 // ---
 
 
@@ -937,7 +910,7 @@ public static partial class XString
 
 
 // ---
-// --- partial: XString_SubstringMax.cs (3) ---
+// --- partial: XString_SubstringMax.cs (2) ---
 // ---
 
 
@@ -978,7 +951,7 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 			return str;
 
 		int finalLen = strLen - index;
-		bool useEllipsis = ellipsis.NotNulle();
+		bool useEllipsis = ellipsis.NotEmpty;
 
 		if(maxLength < finalLen)
 			finalLen = maxLength;
@@ -1011,7 +984,7 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 
 
 // ---
-// --- partial: XString_ToValue.cs (4) ---
+// --- partial: XString_ToValue.cs (3) ---
 // ---
 
 
@@ -1031,10 +1004,9 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 	public static double ToDouble(this string val, double dflt = 0)
 		=> double.TryParse(val, out double v) ? v : dflt;
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool ToBool(this string val, bool dflt = false)
 	{
-		if(val.NotNulle()) {
+		if(val.NotEmpty) {
 			if(bool.TryParse(val, out bool i))
 				return i;
 
@@ -1046,10 +1018,9 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 		return dflt;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static DateTime ToDateTime(this string val, DateTime? defaultVal = null)
 	{
-		if(val.NotNulle()) {
+		if(val.NotEmpty) {
 			// NOTE!!  parses DateTimeOffset and if true gets the DateTime...
 			// big issues with frameword using computer's local time in these considerations,
 			// this was probably not wise though :think: ... but change now would be breaking...
@@ -1071,92 +1042,71 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int? ToIntN(this string val)
-		=> val.NotNulle() && int.TryParse(val, out int v) ? (int?)v : null;
+		=> val.NotEmpty && int.TryParse(val, out int v) ? v : null;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static long? ToLongN(this string val)
-		=> val.NotNulle() && long.TryParse(val, out long v) ? (long?)v : null;
+		=> val.NotEmpty && long.TryParse(val, out long v) ? v : null;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static decimal? ToDecimalN(this string val)
-		=> val.NotNulle() && decimal.TryParse(val, out decimal v) ? (decimal?)v : null;
+		=> val.NotEmpty && decimal.TryParse(val, out decimal v) ? v : null;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static double? ToDoubleN(this string val)
-		=> val.NotNulle() && double.TryParse(val, out double v) ? (double?)v : null;
+		=> val.NotEmpty && double.TryParse(val, out double v) ? v : null;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool? ToBoolN(this string val)
-		=> val.IsNulle() ? (bool?)null : ToBool(val); // must use ToBool, handles numeric...
+		=> val.IsEmpty ? null : ToBool(val); // must use ToBool, handles numeric...
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static DateTime? ToDateTimeN(this string val)
-		=> val.NotNulle() && DateTimeOffset.TryParse(val, out DateTimeOffset v) // see notes above: ToDateTime()
-		? (DateTime?)v.DateTime : null;
+		=> val.NotEmpty && DateTimeOffset.TryParse(val, out DateTimeOffset v) // see notes above: ToDateTime()
+		? v.DateTime : null;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static DateTimeOffset? ToDateTimeOffsetN(this string val)
-		=> val.NotNulle() && DateTimeOffset.TryParse(val, out DateTimeOffset v) ? (DateTimeOffset?)v : null;
+		=> val.NotEmpty && DateTimeOffset.TryParse(val, out DateTimeOffset v) ? v : null;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static Guid? ToGuidN(this string val)
-		=> val.NotNulle() && Guid.TryParse(val, out Guid v) ? (Guid?)v : null;
+		=> val.NotEmpty && Guid.TryParse(val, out Guid v) ? v : null;
 
 
 // ---
-// --- partial: XString_Trim.cs (5) ---
+// --- partial: XString_Trim.cs (4) ---
 // ---
 
 
-[DebuggerStepThrough]
-	public static string NullIfEmptyTrimmed(this string s)
+extension(string s)
 	{
-		s = s.TrimIfNeeded();
-		return s == "" ? null : s;
-	}
+		public bool IsTrimmable
+			=> s != null && s.Length > 0 && (char.IsWhiteSpace(s[0]) || char.IsWhiteSpace(s[^1]));
 
-	[DebuggerStepThrough]
-	public static bool IsTrimmable(this string s)
-	{
-		if(s == null || s.Length < 1)
-			return false;
-		return char.IsWhiteSpace(s[0]) || char.IsWhiteSpace(s[^1]);
-	}
-
-	/// <summary>
-	/// Trims the string only if it is needed. Value CAN be Null or Empty.
-	/// </summary>
-	/// <param name="s">String</param>
-	[DebuggerStepThrough]
-	public static bool TrimIfNeeded(ref string s)
-	{
-		if(s.IsTrimmable()) {
-			s = s.Trim();
-			return true;
+		/// <summary>Trims the string only if it is needed. Value CAN be Null or Empty.</summary>
+		[DebuggerStepThrough]
+		public string TrimIfNeeded()
+		{
+			if(s == null || s.Length == 0) return s;
+			if(char.IsWhiteSpace(s[0]) || char.IsWhiteSpace(s[^1]))
+				return s.Trim();
+			return s;
 		}
-		return false;
-	}
 
-	/// <summary>
-	/// Trims the string only if it is needed. Value CAN be Null or Empty.
-	/// </summary>
-	/// <param name="s">String</param>
-	[DebuggerStepThrough]
-	public static string TrimIfNeeded(this string s)
-	{
-		if(s.IsTrimmable())
-			return s.Trim();
-		return s;
-	}
+		[DebuggerStepThrough]
+		public string TrimToNull()
+		{
+			if(s == null || s.Length == 0) return null;
+			if(char.IsWhiteSpace(s[0]) || char.IsWhiteSpace(s[^1]))
+				s = s.Trim();
+			return s.Length == 0 ? null : s;
+		}
 
-	/// <summary>
-	/// Trims the string if it is not null, else returns null.
-	/// </summary>
-	/// <param name="s">String</param>
-	[DebuggerStepThrough]
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static string TrimN(this string s)
-		=> s?.Trim();
+		/// <summary>Trims the string if it is not null, else returns null.</summary>
+		[DebuggerStepThrough]
+		public string TrimN() => s?.Trim();
+	}
 
 }
 
