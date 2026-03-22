@@ -429,6 +429,16 @@ public static partial class XLinq
 
 		/// <summary>Returns true if null or whitespace.</summary>
 		public bool IsEmptyOrWhiteSpace => string.IsNullOrWhiteSpace(s);
+
+		/// <summary>Returns the first non-null/empty string among the receiver and up to two additional inputs. Returns null if all are null or empty.</summary>
+		[DebuggerStepThrough]
+		public string FirstNotNullOrEmpty(string value2, string value3 = null)
+		{
+			if(s != null && s.Length != 0) return s;
+			if(value2 != null && value2.Length != 0) return value2;
+			if(value3 != null && value3.Length != 0) return value3;
+			return null;
+		}
 	}
 
 	extension<T>(T[] arr)
@@ -858,44 +868,17 @@ public static class XNewLines
 }
 
 
-// ========== combined 5 partial files for: XString ==========
+// ========== combined 4 partial files for: XString ==========
 
 
 // ---
-// --- partial: XString_FirstNotNulle.cs (0) ---
+// --- partial: XString_Print.cs (0) ---
 // ---
 
 
 public static partial class XString
 {
-	/// <summary>
-	/// Returns first input string that is not null or empty. If all are null or empty, returns null.
-	/// </summary>
-	/// <param name="value1">Value 1.</param>
-	/// <param name="value2">Value 2.</param>
-	/// <param name="value3">Value 3.</param>
-	[DebuggerStepThrough]
-	public static string FirstNotNulle(this string value1, string value2, string value3 = null)
-	{
-		if(value1 != null && value1.Length > 0)
-			return value1;
-
-		if(value2 != null && value2.Length > 0)
-			return value2;
-
-		if(value3 != null && value3.Length > 0)
-			return value3;
-
-		return null;
-	}
-
-
-// ---
-// --- partial: XString_Print.cs (1) ---
-// ---
-
-
-// maybe a mistake adding this ... hmmm
+	// maybe a mistake adding this ... hmmm
 
 	[DebuggerStepThrough]
 	public static string Print(this string s)
@@ -910,7 +893,7 @@ public static partial class XString
 
 
 // ---
-// --- partial: XString_SubstringMax.cs (2) ---
+// --- partial: XString_SubstringMax.cs (1) ---
 // ---
 
 
@@ -984,7 +967,7 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 
 
 // ---
-// --- partial: XString_ToValue.cs (3) ---
+// --- partial: XString_ToValue.cs (2) ---
 // ---
 
 
@@ -1075,7 +1058,7 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 
 
 // ---
-// --- partial: XString_Trim.cs (4) ---
+// --- partial: XString_Trim.cs (3) ---
 // ---
 
 
