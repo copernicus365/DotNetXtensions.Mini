@@ -24,6 +24,16 @@ public static partial class XLinq
 
 		/// <summary>Returns true if null or whitespace.</summary>
 		public bool IsEmptyOrWhiteSpace => string.IsNullOrWhiteSpace(s);
+
+		/// <summary>Returns the first non-null/empty string among the receiver and up to two additional inputs. Returns null if all are null or empty.</summary>
+		[DebuggerStepThrough]
+		public string FirstNotNullOrEmpty(string value2, string value3 = null)
+		{
+			if(s != null && s.Length != 0) return s;
+			if(value2 != null && value2.Length != 0) return value2;
+			if(value3 != null && value3.Length != 0) return value3;
+			return null;
+		}
 	}
 
 	extension<T>(T[] arr)
