@@ -207,24 +207,24 @@ public class XLinq_Empty_Tests
 	[Theory]
 	[InlineData(null, true)]
 	[InlineData("", true)]
-	[InlineData("hello", false)]
-	public void IsEmpty_String(string s, bool expected)
-		=> Equal(expected, s.IsEmpty);
+	[InlineData("hellom", false)]
+	public void IsEmpty_String(string s, bool isEmpty)
+		=> Equal(isEmpty, s.IsEmpty);
 
 	[Theory]
 	[InlineData(null, false)]
 	[InlineData("", false)]
 	[InlineData("hello", true)]
-	public void NotEmpty_String(string s, bool expected)
-		=> Equal(expected, s.NotEmpty);
+	public void NotEmpty_String(string s, bool isEmpty)
+		=> Equal(isEmpty, s.NotEmpty);
 
 	[Theory]
 	[InlineData(null, true)]
 	[InlineData("", true)]
 	[InlineData("  ", true)]
 	[InlineData("hello", false)]
-	public void IsEmptyOrWhiteSpace_String(string s, bool expected)
-		=> Equal(expected, s.IsEmptyOrWhiteSpace);
+	public void IsEmptyOrWhiteSpace_String(string s, bool isEmpty)
+		=> Equal(isEmpty, s.IsEmptyOrWhiteSpace);
 
 	[Theory]
 	[InlineData(null, null)]
