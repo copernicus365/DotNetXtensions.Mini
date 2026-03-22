@@ -2,6 +2,8 @@ namespace DotNetXtensions;
 
 public static partial class XLinq
 {
+	// --- string ---
+
 	extension(string s)
 	{
 		/// <summary>Returns an empty string if null, else returns the string.</summary>
@@ -39,6 +41,8 @@ public static partial class XLinq
 		}
 	}
 
+	// --- array ---
+
 	extension<T>(T[] arr)
 	{
 		/// <summary>Returns an empty array if null, else returns the array.</summary>
@@ -64,30 +68,23 @@ public static partial class XLinq
 		public bool NotNullOrEmpty => arr != null && arr.Length > 0;
 	}
 
+	// --- enumerable ---
+
 	extension<T>(IEnumerable<T> enumerable)
 	{
 		/// <summary>Returns an empty collection if null, else returns the collection.</summary>
 		public IEnumerable<T> EmptyIfNull => enumerable ?? [];
 	}
 
-	// NullIfDefault
-
-	extension<T>(T t) where T : struct
-	{
-		/// <summary>Returns null if the value equals default, else returns the original value.</summary>
-		public T? NullIfDefault => EqualityComparer<T>.Default.Equals(t, default) ? null : t;
-
-		/// <summary>Returns the specified value if the value equals default, else returns the original value.</summary>
-		public T ValueIfDefault(T value) => EqualityComparer<T>.Default.Equals(t, default) ? value : t;
-	}
-
-	// CountN
+	// --- IList ---
 
 	extension<T>(IList<T> list)
 	{
 		/// <summary>Returns the count, or 0 if null.</summary>
 		public int CountN => list == null ? 0 : list.Count;
 	}
+
+	// --- ICollection ---
 
 	extension<T>(ICollection<T> coll)
 	{
@@ -111,16 +108,37 @@ public static partial class XLinq
 		public bool NotNullOrEmpty => coll != null && coll.Count > 0;
 	}
 
+	// --- new() class ---
+
+	extension<T>(T t) where T : class, new()
+	{
+		/// <summary>Returns a new instance if null, else returns the object.</summary>
+		public T EmptyIfNull => t ?? new T();
+	}
+
+	// --- struct ---
+
+	extension<T>(T t) where T : struct
+	{
+		/// <summary>Returns null if the value equals default, else returns the original value.</summary>
+		public T? NullIfDefault => EqualityComparer<T>.Default.Equals(t, default) ? null : t;
+
+		/// <summary>Returns the specified value if the value equals default, else returns the original value.</summary>
+		public T ValueIfDefault(T value) => EqualityComparer<T>.Default.Equals(t, default) ? value : t;
+	}
+
+	// --- nullable struct ---
+
 	extension<TValue>(TValue? value) where TValue : struct
 	{
 		/// <summary>Returns true if null or equals the default value.</summary>
 		public bool IsDefault => value == null || EqualityComparer<TValue>.Default.Equals(value.Value, default);
 
-		/// <summary>Returns true if null or equals the default value.</summary>
-		public bool IsNullOrDefault => value == null || EqualityComparer<TValue>.Default.Equals(value.Value, default);
-
 		/// <summary>Returns true if not null and not equal to the default value.</summary>
 		public bool NotDefault => value != null && !EqualityComparer<TValue>.Default.Equals(value.Value, default);
+
+		/// <summary>Returns true if null or equals the default value.</summary>
+		public bool IsNullOrDefault => value == null || EqualityComparer<TValue>.Default.Equals(value.Value, default);
 
 		/// <summary>Returns true if not null and not equal to the default value.</summary>
 		public bool NotNullOrDefault => value != null && !EqualityComparer<TValue>.Default.Equals(value.Value, default);
@@ -130,11 +148,5 @@ public static partial class XLinq
 
 		/// <summary>Returns the value if it is set (not null and not default), else returns input 'or' value.</summary>
 		public TValue ValueOr(TValue alt) => value == null || EqualityComparer<TValue>.Default.Equals(value.Value, default) ? alt : value.Value;
-	}
-
-	extension<T>(T t) where T : class, new()
-	{
-		/// <summary>Returns a new instance if null, else returns the object.</summary>
-		public T EmptyIfNull => t ?? new T();
 	}
 }
