@@ -120,6 +120,12 @@ public static partial class XLinq
 
 	extension<T>(T t) where T : struct
 	{
+		/// <summary>Returns true if the value equals default.</summary>
+		public bool IsDefault => EqualityComparer<T>.Default.Equals(t, default);
+
+		/// <summary>Returns true if the value does not equal default.</summary>
+		public bool NotDefault => !EqualityComparer<T>.Default.Equals(t, default);
+
 		/// <summary>Returns null if the value equals default, else returns the original value.</summary>
 		public T? NullIfDefault => EqualityComparer<T>.Default.Equals(t, default) ? null : t;
 
@@ -142,6 +148,9 @@ public static partial class XLinq
 
 		/// <summary>Returns true if not null and not equal to the default value.</summary>
 		public bool NotNullOrDefault => value != null && !EqualityComparer<TValue>.Default.Equals(value.Value, default);
+
+		/// <summary>Returns null if null or equals the default value, else returns the value.</summary>
+		public TValue? NullIfDefault => (value == null || EqualityComparer<TValue>.Default.Equals(value.Value, default)) ? null : value;
 
 		/// <summary>Returns the value if not null, else default if null.</summary>
 		public TValue ValueOrDefault => value ?? default;
