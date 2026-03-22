@@ -39,7 +39,7 @@ public static partial class XString
 			return str;
 
 		int finalLen = strLen - index;
-		bool useEllipsis = ellipsis.NotNulle();
+		bool useEllipsis = ellipsis.NotEmpty;
 
 		if(maxLength < finalLen)
 			finalLen = maxLength;

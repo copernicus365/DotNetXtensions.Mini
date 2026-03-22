@@ -101,8 +101,8 @@ public class XStringToValue_Tests
 	[InlineData("abc", sample_guid1, sample_guid1)]
 	public void T_ToGuid(string val, string expected, string dflt = default, bool success = true)
 	{
-		var _dflt = dflt.IsNulle() ? Guid.Empty : new Guid(dflt);
-		var _expected = expected.IsNulle() ? Guid.Empty : new Guid(expected);
+		var _dflt = dflt.IsEmpty ? Guid.Empty : new Guid(dflt);
+		var _expected = expected.IsEmpty ? Guid.Empty : new Guid(expected);
 		isMatch(val.ToGuid(_dflt), _expected, success);
 	}
 

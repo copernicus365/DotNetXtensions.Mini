@@ -20,7 +20,7 @@ public static partial class XString
 
 	public static bool ToBool(this string val, bool dflt = false)
 	{
-		if(val.NotNulle()) {
+		if(val.NotEmpty) {
 			if(bool.TryParse(val, out bool i))
 				return i;
 
@@ -34,7 +34,7 @@ public static partial class XString
 
 	public static DateTime ToDateTime(this string val, DateTime? defaultVal = null)
 	{
-		if(val.NotNulle()) {
+		if(val.NotEmpty) {
 			// NOTE!!  parses DateTimeOffset and if true gets the DateTime...
 			// big issues with frameword using computer's local time in these considerations,
 			// this was probably not wise though :think: ... but change now would be breaking...
@@ -56,34 +56,34 @@ public static partial class XString
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int? ToIntN(this string val)
-		=> val.NotNulle() && int.TryParse(val, out int v) ? v : null;
+		=> val.NotEmpty && int.TryParse(val, out int v) ? v : null;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static long? ToLongN(this string val)
-		=> val.NotNulle() && long.TryParse(val, out long v) ? v : null;
+		=> val.NotEmpty && long.TryParse(val, out long v) ? v : null;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static decimal? ToDecimalN(this string val)
-		=> val.NotNulle() && decimal.TryParse(val, out decimal v) ? v : null;
+		=> val.NotEmpty && decimal.TryParse(val, out decimal v) ? v : null;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static double? ToDoubleN(this string val)
-		=> val.NotNulle() && double.TryParse(val, out double v) ? v : null;
+		=> val.NotEmpty && double.TryParse(val, out double v) ? v : null;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool? ToBoolN(this string val)
-		=> val.IsNulle() ? null : ToBool(val); // must use ToBool, handles numeric...
+		=> val.IsEmpty ? null : ToBool(val); // must use ToBool, handles numeric...
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static DateTime? ToDateTimeN(this string val)
-		=> val.NotNulle() && DateTimeOffset.TryParse(val, out DateTimeOffset v) // see notes above: ToDateTime()
+		=> val.NotEmpty && DateTimeOffset.TryParse(val, out DateTimeOffset v) // see notes above: ToDateTime()
 		? v.DateTime : null;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static DateTimeOffset? ToDateTimeOffsetN(this string val)
-		=> val.NotNulle() && DateTimeOffset.TryParse(val, out DateTimeOffset v) ? v : null;
+		=> val.NotEmpty && DateTimeOffset.TryParse(val, out DateTimeOffset v) ? v : null;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static Guid? ToGuidN(this string val)
-		=> val.NotNulle() && Guid.TryParse(val, out Guid v) ? v : null;
+		=> val.NotEmpty && Guid.TryParse(val, out Guid v) ? v : null;
 }

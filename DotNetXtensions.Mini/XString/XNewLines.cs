@@ -18,7 +18,7 @@ public static class XNewLines
 	/// string if null, empty, or if <paramref name="ifNeeded"/> is true and no '\r' found.</returns>
 	public static string ToUnixLines(this string s, bool ifNeeded = false)
 	{
-		if(s.IsNulle())
+		if(s.IsEmpty)
 			return s;
 
 		if(ifNeeded && s.IndexOf('\r') < 0)
@@ -40,7 +40,7 @@ public static class XNewLines
 	/// <returns>Array of lines. Returns empty if null or empty input.</returns>
 	public static string[] GetLines(this string s, bool trim = false, bool ignoreEmpty = false, bool unixOnly = false)
 	{
-		if(s.IsNulle())
+		if(s.IsEmpty)
 			return [];
 
 		StringSplitOptions options = StringSplitOptions.None;
@@ -67,7 +67,7 @@ public static class XNewLines
 	/// <returns>Lazy enumerable of lines. Call .ToArray() if you need all lines materialized upfront.</returns>
 	public static IEnumerable<string> GetLinesLazy(this string s, bool trim = false, bool ignoreEmpty = false, bool unixOnly = false)
 	{
-		if(s.IsNulle())
+		if(s.IsEmpty)
 			yield break;
 
 		int pos = 0;
@@ -157,7 +157,7 @@ public static class XNewLines
 	/// </example>
 	public static void ForEachLine(this string s, Func<string, bool> act, bool trim = false, bool ignoreEmpty = false)
 	{
-		if(s.IsNulle())
+		if(s.IsEmpty)
 			return;
 
 		foreach(var line in s.AsSpan().EnumerateLines()) {
