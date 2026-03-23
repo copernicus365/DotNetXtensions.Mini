@@ -403,9 +403,9 @@ var results = items.SkipTakeIf(paginationEnabled, skip: 20, count: 10);
 Extensions for graceful handling of null collections and nullable values.
 
 - **`EmptyIfNull`** - 🌟 Returns empty collection/array/string if null (property) 🌟
-- **`NullIfDefault`** - Returns null if a struct value equals its default
-- **`ValueIfDefault(v)`** - Returns `v` if value equals default, otherwise the original value
-- **`ValueOrDefault`** - Gets the value if not null, else `default(T)` (property)
+- **`IsDefault`** / **`NotDefault`** - Check if a struct value equals its default; null-safe on `Nullable<T>`
+- **`NullIfDefault`** - Returns null if a struct value equals its default; null-safe on `Nullable<T>`
+- **`ValueOrDefault`** - Gets the value if not null, else `default(T)` (property, on `Nullable<T>`)
 - **`ValueOr(alt)`** - Returns `alt` if null **or default** (treats both as "not set"), otherwise the value
 
 ```csharp
