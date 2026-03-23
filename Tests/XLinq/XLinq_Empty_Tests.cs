@@ -438,7 +438,7 @@ public class XLinq_Empty_Tests
 	[Fact]
 	public void IsEmpty_ICollection_NonEmpty()
 	{
-		ICollection<int> coll = new List<int> { 1, 2 };
+		List<int> coll = [1, 2];
 		False(coll.IsEmpty);
 		False(coll.IsNullOrEmpty);
 		True(coll.NotEmpty);
