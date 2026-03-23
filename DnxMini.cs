@@ -154,12 +154,12 @@ public static partial class XDateTimes
 		=> new(value.UnixTimeSecondsToTicks(), offset ?? TimeSpan.Zero);
 
 
-// ---
-// --- partial: XDateTimes_OffsetConversions.cs (1) ---
-// ---
+	// ---
+	// --- partial: XDateTimes_OffsetConversions.cs (1) ---
+	// ---
 
 
-/// <summary>
+	/// <summary>
 	/// Convenience overload for converting to a new offset based on TimeZoneInfo.
 	/// Equivalent to <c>dt.ToOffset(tzi.GetUtcOffset(dt))</c>.
 	/// </summary>
@@ -233,15 +233,15 @@ public static partial class XDateTimes
 
 
 	/// <summary>
-	/// Converts input DateTime to a new DateTimeOffset with the specified Offset value. 
-	/// Importantly, the Kind property on the input DateTime *is ignored* 
+	/// Converts input DateTime to a new DateTimeOffset with the specified Offset value.
+	/// Importantly, the Kind property on the input DateTime *is ignored*
 	/// (the framework unfortunately throws an exception if <c>dt.Kind == DateTimeKind.Utc</c>).
 	/// Set the <paramref name="isUtc"/> value to true (default is true) to indicate input DateTime is
 	/// already UTC time, or false to be treated as a local time (any non-UTC time).
 	/// </summary>
 	/// <param name="dt">DateTime</param>
 	/// <param name="offset">Offset</param>
-	/// <param name="isUtc">Indicates if the input DateTime is already a UTC value 
+	/// <param name="isUtc">Indicates if the input DateTime is already a UTC value
 	/// or else a Local value (any time that is not UTC).</param>
 	static DateTimeOffset __ToDateTimeOffset(DateTime dt, TimeSpan offset, bool isUtc = true)
 	{
@@ -285,12 +285,12 @@ public static partial class XDateTimes
 	static readonly long _maxDTTicks = DateTimeOffset.MaxValue.Ticks;
 
 
-// ---
-// --- partial: XDateTimes_Round.cs (2) ---
-// ---
+	// ---
+	// --- partial: XDateTimes_Round.cs (2) ---
+	// ---
 
 
-// http://stackoverflow.com/questions/7029353/how-can-i-round-up-the-time-to-the-nearest-x-minutes
+	// http://stackoverflow.com/questions/7029353/how-can-i-round-up-the-time-to-the-nearest-x-minutes
 
 	// --- Round ---
 
@@ -407,6 +407,8 @@ public static partial class XDictionary
 
 public static partial class XLinq
 {
+	// --- string ---
+
 	extension(string s)
 	{
 		/// <summary>Returns an empty string if null, else returns the string.</summary>
@@ -415,22 +417,25 @@ public static partial class XLinq
 		/// <summary>Returns null if empty string, else returns the string.</summary>
 		public string NullIfEmpty => s == "" ? null : s;
 
-		/// <summary>Returns null if empty string, else returns the string.</summary>
+		/// <summary>Returns null if value is null, empty, or consists exclusively of white-space. Else returns the string.</summary>
 		public string NullIfWhitespace => string.IsNullOrWhiteSpace(s) ? null : s;
 
 		/// <summary>Returns the length, or 0 if null.</summary>
 		public int LengthN => s == null ? 0 : s.Length;
 
-		/// <summary>Returns true if null or empty.</summary>
+		/// <summary>Returns true if null or empty. Null-safe.</summary>
+		/// <remarks>Extension-property form of the static <c>string.IsNullOrEmpty</c>.</remarks>
 		public bool IsEmpty => s == null || s.Length == 0;
 
-		/// <summary>Returns true if not null and not empty.</summary>
+		/// <summary>Returns true if not null and not empty. Null-safe.</summary>
+		/// <remarks>Extension-property form of <c>!string.IsNullOrEmpty</c>.</remarks>
 		public bool NotEmpty => s != null && s.Length != 0;
 
-		/// <summary>Returns true if null or whitespace.</summary>
+		/// <summary>Returns true if value is null, empty, or consists exclusively of white-space. Null-safe. This is an indirection call to <c>string.IsNullOrWhiteSpace</c></summary>
+		/// <remarks>Extension-property form of the static <c>string.IsNullOrWhiteSpace</c>. The inverted prefix avoids a name conflict with that static method.</remarks>
 		public bool IsEmptyOrWhiteSpace => string.IsNullOrWhiteSpace(s);
 
-		/// <summary>Returns the first non-null/empty string among the receiver and up to two additional inputs. Returns null if all are null or empty.</summary>
+		/// <summary>Returns the first non-null/empty string, checking up to two additional values. Returns null if all are null or empty.</summary>
 		[DebuggerStepThrough]
 		public string FirstNotNullOrEmpty(string value2, string value3 = null)
 		{
@@ -441,6 +446,8 @@ public static partial class XLinq
 		}
 	}
 
+	// --- array ---
+
 	extension<T>(T[] arr)
 	{
 		/// <summary>Returns an empty array if null, else returns the array.</summary>
@@ -449,18 +456,24 @@ public static partial class XLinq
 		/// <summary>Returns the length, or 0 if null.</summary>
 		public int LengthN => arr == null ? 0 : arr.Length;
 
-		/// <summary>Returns true if null or empty.</summary>
+		/// <summary>Returns true if null or empty. Null-safe.</summary>
+		/// <remarks>Short form of <c>IsNullOrEmpty</c>.</remarks>
 		public bool IsEmpty => arr == null || arr.Length < 1;
 
 		/// <summary>Returns true if null or empty.</summary>
+		/// <remarks>Full-name alias for <c>IsEmpty</c>.</remarks>
 		public bool IsNullOrEmpty => arr == null || arr.Length < 1;
 
-		/// <summary>Returns true if not null and not empty.</summary>
+		/// <summary>Returns true if not null and not empty. Null-safe.</summary>
+		/// <remarks>Short form of <c>NotNullOrEmpty</c>.</remarks>
 		public bool NotEmpty => arr != null && arr.Length > 0;
 
 		/// <summary>Returns true if not null and not empty.</summary>
+		/// <remarks>Full-name alias for <c>NotEmpty</c>.</remarks>
 		public bool NotNullOrEmpty => arr != null && arr.Length > 0;
 	}
+
+	// --- enumerable ---
 
 	extension<T>(IEnumerable<T> enumerable)
 	{
@@ -468,18 +481,7 @@ public static partial class XLinq
 		public IEnumerable<T> EmptyIfNull => enumerable ?? [];
 	}
 
-	// NullIfDefault
-
-	extension<T>(T t) where T : struct
-	{
-		/// <summary>Returns null if the value equals default, else returns the original value.</summary>
-		public T? NullIfDefault => EqualityComparer<T>.Default.Equals(t, default) ? null : t;
-
-		/// <summary>Returns the specified value if the value equals default, else returns the original value.</summary>
-		public T ValueIfDefault(T value) => EqualityComparer<T>.Default.Equals(t, default) ? value : t;
-	}
-
-	// CountN
+	// --- IList ---
 
 	extension<T>(IList<T> list)
 	{
@@ -487,44 +489,31 @@ public static partial class XLinq
 		public int CountN => list == null ? 0 : list.Count;
 	}
 
+	// --- ICollection ---
+
 	extension<T>(ICollection<T> coll)
 	{
 		/// <summary>Returns the count, or 0 if null.</summary>
 		public int CountN => coll == null ? 0 : coll.Count;
 
-		/// <summary>Returns true if null or empty.</summary>
+		/// <summary>Returns true if null or empty. Null-safe.</summary>
+		/// <remarks>Short form of <c>IsNullOrEmpty</c>.</remarks>
 		public bool IsEmpty => coll == null || coll.Count < 1;
 
 		/// <summary>Returns true if null or empty.</summary>
+		/// <remarks>Full-name alias for <c>IsEmpty</c>.</remarks>
 		public bool IsNullOrEmpty => coll == null || coll.Count < 1;
 
-		/// <summary>Returns true if not null and not empty.</summary>
+		/// <summary>Returns true if not null and not empty. Null-safe.</summary>
+		/// <remarks>Short form of <c>NotNullOrEmpty</c>.</remarks>
 		public bool NotEmpty => coll != null && coll.Count > 0;
 
 		/// <summary>Returns true if not null and not empty.</summary>
+		/// <remarks>Full-name alias for <c>NotEmpty</c>.</remarks>
 		public bool NotNullOrEmpty => coll != null && coll.Count > 0;
 	}
 
-	extension<TValue>(TValue? value) where TValue : struct
-	{
-		/// <summary>Returns true if null or equals the default value.</summary>
-		public bool IsDefault => value == null || EqualityComparer<TValue>.Default.Equals(value.Value, default);
-
-		/// <summary>Returns true if null or equals the default value.</summary>
-		public bool IsNullOrDefault => value == null || EqualityComparer<TValue>.Default.Equals(value.Value, default);
-
-		/// <summary>Returns true if not null and not equal to the default value.</summary>
-		public bool NotDefault => value != null && !EqualityComparer<TValue>.Default.Equals(value.Value, default);
-
-		/// <summary>Returns true if not null and not equal to the default value.</summary>
-		public bool NotNullOrDefault => value != null && !EqualityComparer<TValue>.Default.Equals(value.Value, default);
-
-		/// <summary>Returns the value if not null, else default if null.</summary>
-		public TValue ValueOrDefault => value ?? default;
-
-		/// <summary>Returns the value if it is set (not null and not default), else returns input 'or' value.</summary>
-		public TValue ValueOr(TValue alt) => value == null || EqualityComparer<TValue>.Default.Equals(value.Value, default) ? alt : value.Value;
-	}
+	// --- new() class ---
 
 	extension<T>(T t) where T : class, new()
 	{
@@ -532,13 +521,61 @@ public static partial class XLinq
 		public T EmptyIfNull => t ?? new T();
 	}
 
+	// --- struct ---
 
-// ---
-// --- partial: XLinq_IfLinq.cs (1) ---
-// ---
+	extension<T>(T t) where T : struct
+	{
+		/// <summary>Returns true if the value equals default.</summary>
+		public bool IsDefault => EqualityComparer<T>.Default.Equals(t, default);
+
+		/// <summary>Returns true if the value does not equal default.</summary>
+		public bool NotDefault => !EqualityComparer<T>.Default.Equals(t, default);
+
+		/// <summary>Returns null if the value equals default, else returns the original value.</summary>
+		public T? NullIfDefault => EqualityComparer<T>.Default.Equals(t, default) ? null : t;
+
+		/// <summary>Returns value if not default, otherwise returns <c>alt</c>.</summary>
+		public T ValueOr(T alt) => EqualityComparer<T>.Default.Equals(t, default) ? alt : t;
+	}
+
+	// --- nullable struct ---
+
+	extension<T>(T? value) where T : struct
+	{
+		/// <summary>Returns true if null or equals the default value. Null-safe.</summary>
+		/// <remarks>Short form of <c>IsNullOrDefault</c>.</remarks>
+		public bool IsDefault => value == null || EqualityComparer<T>.Default.Equals(value.Value, default);
+
+		/// <summary>Returns true if null or equals the default value.</summary>
+		/// <remarks>Full-name alias for <c>IsDefault</c>.</remarks>
+		public bool IsNullOrDefault => value == null || EqualityComparer<T>.Default.Equals(value.Value, default);
+
+		/// <summary>Returns true if not null and not equal to the default value. Null-safe.</summary>
+		/// <remarks>Short form of <c>NotNullOrDefault</c>.</remarks>
+		public bool NotDefault => value != null && !EqualityComparer<T>.Default.Equals(value.Value, default);
+
+		/// <summary>Returns true if not null and not equal to the default value.</summary>
+		/// <remarks>Full-name alias for <c>NotDefault</c>.</remarks>
+		public bool NotNullOrDefault => value != null && !EqualityComparer<T>.Default.Equals(value.Value, default);
+
+		/// <summary>Returns null if null or equals the default value, else returns the value.</summary>
+		public T? NullIfDefault => (value == null || EqualityComparer<T>.Default.Equals(value.Value, default)) ? null : value;
+
+		/// <summary>Returns the value if not null, otherwise returns default.</summary>
+		/// <remarks>Extension-property equivalent of the framework's <c>Nullable{T}.GetValueOrDefault()</c>.</remarks>
+		public T ValueOrDefault => value ?? default;
+
+		/// <summary>Returns value if not null or default, otherwise returns <c>alt</c>.</summary>
+		public T ValueOr(T alt) => value == null || EqualityComparer<T>.Default.Equals(value.Value, default) ? alt : value.Value;
+	}
 
 
-// --- WhereIf ---
+	// ---
+	// --- partial: XLinq_IfLinq.cs (1) ---
+	// ---
+
+
+	// --- WhereIf ---
 
 	/// <summary>Applies Where filter if condition is true.</summary>
 	[DebuggerStepThrough]
@@ -623,14 +660,14 @@ public static partial class XLinq
 		=> !condition ? source : source?.Skip(skip).Take(count);
 
 
-// ---
-// --- partial: XLinq_JoinToString.cs (2) ---
-// ---
+	// ---
+	// --- partial: XLinq_JoinToString.cs (2) ---
+	// ---
 
 
-[DebuggerStepThrough]
+	[DebuggerStepThrough]
 	public static string JoinToString<T>(this IEnumerable<T> source, string separator = ",")
-		=> source == null ? null : string.Join(separator, source);
+			=> source == null ? null : string.Join(separator, source);
 
 	[DebuggerStepThrough]
 	public static string JoinToString<T>(this IEnumerable<T> source, Func<T, string> selector, string separator = ",")
@@ -892,13 +929,13 @@ public static partial class XString
 		=> Console.Write(obj);
 
 
-// ---
-// --- partial: XString_SubstringMax.cs (1) ---
-// ---
+	// ---
+	// --- partial: XString_SubstringMax.cs (1) ---
+	// ---
 
 
-public static string SubstringMax(this string str, int maxLength, string ellipsis = null, bool tryBreakOnWord = false)
-		=> SubstringMax(str, 0, maxLength, ellipsis: ellipsis, tryBreakOnWord: tryBreakOnWord);
+	public static string SubstringMax(this string str, int maxLength, string ellipsis = null, bool tryBreakOnWord = false)
+			=> SubstringMax(str, 0, maxLength, ellipsis: ellipsis, tryBreakOnWord: tryBreakOnWord);
 
 	/// <summary>
 	/// Returns a substring of the input string where instead of specifying
@@ -966,14 +1003,14 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 	}
 
 
-// ---
-// --- partial: XString_ToValue.cs (2) ---
-// ---
+	// ---
+	// --- partial: XString_ToValue.cs (2) ---
+	// ---
 
 
-[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int ToInt(this string val, int dflt = 0)
-		=> int.TryParse(val, out int v) ? v : dflt;
+			=> int.TryParse(val, out int v) ? v : dflt;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static long ToLong(this string val, long dflt = 0)
@@ -1057,12 +1094,12 @@ public static string SubstringMax(this string str, int maxLength, string ellipsi
 		=> val.NotEmpty && Guid.TryParse(val, out Guid v) ? v : null;
 
 
-// ---
-// --- partial: XString_Trim.cs (3) ---
-// ---
+	// ---
+	// --- partial: XString_Trim.cs (3) ---
+	// ---
 
 
-extension(string s)
+	extension(string s)
 	{
 		public bool IsTrimmable
 			=> s != null && s.Length > 0 && (char.IsWhiteSpace(s[0]) || char.IsWhiteSpace(s[^1]));
