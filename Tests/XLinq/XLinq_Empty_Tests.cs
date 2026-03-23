@@ -5,7 +5,18 @@ public class XLinq_Empty_Tests
 	#region --- EmptyIfNull ---
 
 	[Fact]
-	public void EmptyIfNull_Class_Null_ReturnsNewInstance()
+	public void EmptyIfNull_Class_Null_ReturnsNewInstance_FooB()
+	{
+		FooB foo = null;
+		FooB result = foo.EmptyIfNull;
+		result.Name = "Joe";
+		NotNull(result);
+		Equal(12, result.Id);
+		Equal("Joe", result.Name);
+	}
+
+	[Fact]
+	public void EmptyIfNull_Class_Null_ReturnsNewInstance_List()
 	{
 		List<int> list = null;
 		List<int> result = list.EmptyIfNull;
@@ -14,18 +25,39 @@ public class XLinq_Empty_Tests
 	}
 
 	[Fact]
-	public void EmptyIfNull_Class_NonNull_ReturnsSameReference()
+	public void EmptyIfNull_Class_NonNull_ReturnsSameReference_List()
 	{
 		List<int> list = new List<int> { 1, 2 };
 		Same(list, list.EmptyIfNull);
 	}
 
-	[Theory]
-	[InlineData(null, "")]
-	[InlineData("", "")]
-	[InlineData("hello", "hello")]
-	public void EmptyIfNull_String(string input, string expected)
-		=> Equal(expected, input.EmptyIfNull);
+	[Fact]
+	public void EmptyIfNull_Class_NonNull_ReturnsSameReference_Foo()
+	{
+		FooB foo = new() { Id = 3, Name = "Anastasia" };
+		Same(foo, foo.EmptyIfNull);
+	}
+
+	[Fact]
+	public void EmptyIfNull_String_NullToEmpty()
+	{
+		string s = null;
+		Equal("", s.EmptyIfNull);
+	}
+
+	[Fact]
+	public void EmptyIfNull_String_EmptyToEmpty()
+	{
+		string s = "";
+		Equal("", s.EmptyIfNull);
+	}
+
+	[Fact]
+	public void EmptyIfNull_String_ValueStays()
+	{
+		string s = "hey!";
+		Equal("hey!", s.EmptyIfNull);
+	}
 
 	[Fact]
 	public void EmptyIfNull_Array_Null_ReturnsEmptyArray()
@@ -63,21 +95,17 @@ public class XLinq_Empty_Tests
 
 	#region --- NullIfDefault ---
 
-	[Theory]
-	[InlineData(0, true)]
-	[InlineData(5, false)]
-	[InlineData(-1, false)]
-	public void NullIfDefault_Int(int input, bool expectNull)
-	{
-		int? result = input.NullIfDefault;
-		Equal(expectNull, result == null);
-		if(!expectNull)
-			Equal(input, result!.Value);
-	}
+	[Fact]
+	public void NullIfDefault_Int_0_ReturnsNull() => Null(0.NullIfDefault);
 
 	[Fact]
-	public void NullIfDefault_Guid_Empty_ReturnsNull()
-		=> Null(Guid.Empty.NullIfDefault);
+	public void NullIfDefault_Int_Stays() => Equal(3, 3.NullIfDefault);
+
+	[Fact]
+	public void NullIfDefault_Int_Negative_Stays() => Equal(-4, -4.NullIfDefault);
+
+	[Fact]
+	public void NullIfDefault_Guid_Empty_ReturnsNull() => Null(Guid.Empty.NullIfDefault);
 
 	[Fact]
 	public void NullIfDefault_Guid_NonEmpty_ReturnsSelf()
@@ -86,16 +114,63 @@ public class XLinq_Empty_Tests
 		Equal(g, g.NullIfDefault!.Value);
 	}
 
+	[Theory]
+	[InlineData(null, true)]
+	[InlineData(0, true)]
+	[InlineData(5, false)]
+	public void NullIfDefault_NullableInt(int? input, bool expectNull)
+	{
+		int? result = input.NullIfDefault;
+		Equal(expectNull, result == null);
+		if(!expectNull)
+			Equal(input, result!.Value);
+	}
+
 	#endregion
 
-	#region --- ValueOr (struct) ---
+	#region --- ValueOrDefault ---
 
-	[Theory]
-	[InlineData(0, 99, 99)]
-	[InlineData(5, 99, 5)]
-	[InlineData(-1, 99, -1)]
-	public void ValueOr_Int(int input, int fallback, int expected)
-		=> Equal(expected, input.ValueOr(fallback));
+	[Fact]
+	public void ValueOrDefault_Null_ReturnsDefault()
+	{
+		int? val = null;
+		Equal(0, val.ValueOrDefault);
+	}
+
+	[Fact]
+	public void ValueOrDefault_Null_Vs_ValueOr()
+	{
+		int? val = null;
+		Equal(0, val.ValueOrDefault);
+		Equal(55, val.ValueOr(55));
+	}
+
+	[Fact]
+	public void ValueOrDefault_Zero_ReturnsZero()
+	{
+		int? val = 0;
+		Equal(0, val.ValueOrDefault);  // null-check only; 0 is not null, returns 0
+	}
+
+	[Fact]
+	public void ValueOrDefault_WValue_ReturnsValue()
+	{
+		int? val = 5;
+		Equal(5, val.ValueOrDefault);
+	}
+
+	#endregion
+
+	#region --- ValueOr ---
+
+	[Fact]
+	public void ValueOr_Int_0_ReturnsAlt() => Equal(5, 0.ValueOr(5));
+
+	[Fact]
+	public void ValueOr_Int_WValue_Pos_ReturnsValue() => Equal(33, 33.ValueOr(5));
+
+	[Fact]
+	public void ValueOr_Int_WValue_Neg_ReturnsValue() => Equal(-22, -22.ValueOr(5));
 
 	[Fact]
 	public void ValueOr_Guid_Default_ReturnsFallback()
@@ -105,7 +180,7 @@ public class XLinq_Empty_Tests
 	}
 
 	[Fact]
-	public void ValueOr_Guid_NonDefault_ReturnsOriginal()
+	public void ValueOr_Guid_WValue_ReturnsOriginal()
 	{
 		Guid g = Guid.NewGuid();
 		Guid fallback = Guid.NewGuid();
@@ -113,9 +188,55 @@ public class XLinq_Empty_Tests
 		Equal(g, g.ValueOr(fallback));
 	}
 
+	// --- Nullable<T> ---
+
+	[Fact]
+	public void ValueOr_Null_ReturnsAlt()
+	{
+		int? val = null;
+		Equal(99, val.ValueOr(99));
+	}
+
+	[Fact]
+	public void ValueOr_Zero_ReturnsAlt()
+	{
+		int? val = 0;
+		Equal(99, val.ValueOr(99));  // 0 == default, treated as "not set"
+	}
+
+	[Fact]
+	public void ValueOr_Zero_ReturnsAltAsZero()
+	{
+		int? val = 0;
+		Equal(0, val.ValueOr(0));
+	}
+
+	[Fact]
+	public void ValueOr_WValue_ReturnsValue()
+	{
+		int? val = 5;
+		Equal(5, val.ValueOr(99));
+	}
+
 	#endregion
 
-	#region --- IsDefault / NotDefault (struct) ---
+	#region --- IsDefault / NotDefault ---
+
+	[Fact]
+	public void IsDefault_NotDefault_int_WValue()
+	{
+		int val = 3;
+		False(val.IsDefault);
+		True(val.NotDefault);
+	}
+
+	[Fact]
+	public void IsDefault_NotDefault_int_0()
+	{
+		int val = 0;
+		True(val.IsDefault);
+		False(val.NotDefault);
+	}
 
 	[Theory]
 	[InlineData(0, true)]
@@ -128,20 +249,32 @@ public class XLinq_Empty_Tests
 	}
 
 	[Fact]
-	public void IsDefault_Guid_Empty_ReturnsTrue()
+	public void IsDefault_Guid_Empty_True()
 		=> True(Guid.Empty.IsDefault);
 
 	[Fact]
-	public void IsDefault_Guid_NonEmpty_ReturnsFalse()
+	public void IsDefault_Guid_NonEmpty_False()
 		=> False(Guid.NewGuid().IsDefault);
 
 	[Fact]
-	public void IsDefault_char_Empty_ReturnsTrue()
+	public void IsDefault_char_Empty_True()
 		=> True(char.MinValue.IsDefault);
 
 	[Fact]
-	public void IsDefault_char_NonEmpty_ReturnsFalse()
+	public void IsDefault_char_NonEmpty_False()
 		=> False('a'.IsDefault);
+
+	[Theory]
+	[InlineData(null, true)]
+	[InlineData(0, true)]   // default(int) is also "not set"
+	[InlineData(5, false)]
+	public void IsDefault_NotDefault_NullableInt(int? input, bool expected)
+	{
+		Equal(expected, input.IsDefault);
+		Equal(expected, input.IsNullOrDefault);
+		Equal(!expected, input.NotDefault);
+		Equal(!expected, input.NotNullOrDefault);
+	}
 
 	#endregion
 
@@ -153,15 +286,6 @@ public class XLinq_Empty_Tests
 		int[] arr = null;
 		Equal(0, arr.LengthN);
 	}
-
-	//[Theory]
-	//[InlineData(0, 0)]
-	//[InlineData(5, 5)]
-	//public void LengthN_Array_Null_WDefaults(int defaultValue, int expected)
-	//{
-	//	int[] arr = null;
-	//	Equal(expected, arr.LengthN(defaultValue));
-	//}
 
 	[Fact]
 	public void LengthN_Array_Empty()
@@ -181,14 +305,6 @@ public class XLinq_Empty_Tests
 	public void LengthN_String(string s, int expected)
 		=> Equal(expected, s.LengthN);
 
-	//[Theory]
-	//[InlineData(null, 0, 0)]
-	//[InlineData(null, 5, 5)]
-	//[InlineData("", 0, 0)]
-	//[InlineData("hello", 0, 5)]
-	//public void LengthN_String_WDefaults(string s, int defaultValue, int expected)
-	//	=> Equal(expected, s.LengthN(defaultValue));
-
 	#endregion
 
 	#region --- CountN ---
@@ -198,7 +314,6 @@ public class XLinq_Empty_Tests
 	{
 		IList<int> list = null;
 		Equal(0, list.CountN);
-		////Equal(3, list.CountN(3));
 	}
 
 	[Fact]
@@ -220,7 +335,6 @@ public class XLinq_Empty_Tests
 	{
 		ICollection<string> coll = null;
 		Equal(0, coll.CountN);
-		////Equal(7, coll.CountN(7));
 	}
 
 	[Fact]
@@ -333,81 +447,5 @@ public class XLinq_Empty_Tests
 
 	#endregion
 
-	#region --- Nullable<T>: IsDefault / NotDefault / ValueOrDefault / ValueOr ---
-
-	[Theory]
-	[InlineData(null, true)]
-	[InlineData(0, true)]   // default(int) is also "not set"
-	[InlineData(5, false)]
-	public void IsDefault_NullableInt(int? input, bool expected)
-	{
-		Equal(expected, input.IsDefault);
-		Equal(expected, input.IsNullOrDefault);
-	}
-
-	[Theory]
-	[InlineData(null, false)]
-	[InlineData(0, false)]
-	[InlineData(5, true)]
-	public void NotDefault_NullableInt(int? input, bool expected)
-	{
-		Equal(expected, input.NotDefault);
-		Equal(expected, input.NotNullOrDefault);
-	}
-
-	[Fact]
-	public void ValueOrDefault_Null_ReturnsDefault()
-	{
-		int? val = null;
-		Equal(0, val.ValueOrDefault);
-	}
-
-	[Fact]
-	public void ValueOrDefault_Zero_ReturnsZero()
-	{
-		int? val = 0;
-		Equal(0, val.ValueOrDefault);  // null-check only; 0 is not null, returns 0
-	}
-
-	[Fact]
-	public void ValueOrDefault_NonDefault_ReturnsValue()
-	{
-		int? val = 5;
-		Equal(5, val.ValueOrDefault);
-	}
-
-	[Fact]
-	public void ValueOr_Null_ReturnsAlt()
-	{
-		int? val = null;
-		Equal(99, val.ValueOr(99));
-	}
-
-	[Fact]
-	public void ValueOr_Zero_ReturnsAlt()
-	{
-		int? val = 0;
-		Equal(99, val.ValueOr(99));  // 0 == default, treated as "not set"
-	}
-
-	[Fact]
-	public void ValueOr_NonDefault_ReturnsValue()
-	{
-		int? val = 5;
-		Equal(5, val.ValueOr(99));
-	}
-
-	[Theory]
-	[InlineData(null, true)]
-	[InlineData(0, true)]
-	[InlineData(5, false)]
-	public void NullIfDefault_NullableInt(int? input, bool expectNull)
-	{
-		int? result = input.NullIfDefault;
-		Equal(expectNull, result == null);
-		if(!expectNull)
-			Equal(input, result!.Value);
-	}
-
-	#endregion
+	class FooB { public int Id { get; set; } = 12; public string Name { get; set; } };
 }
