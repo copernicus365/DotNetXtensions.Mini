@@ -129,41 +129,38 @@ public static partial class XLinq
 		/// <summary>Returns null if the value equals default, else returns the original value.</summary>
 		public T? NullIfDefault => EqualityComparer<T>.Default.Equals(t, default) ? null : t;
 
-
-
-		// --- check...
-
-		/// <summary>Returns the specified value if the value equals default, else returns the original value.</summary>
-		public T ValueIfDefault(T value) => EqualityComparer<T>.Default.Equals(t, default) ? value : t;
+		/// <summary>Returns value if not default, otherwise returns <c>alt</c>.</summary>
+		public T ValueOr(T alt) => EqualityComparer<T>.Default.Equals(t, default) ? alt : t;
 	}
 
 	// --- nullable struct ---
 
 	extension<T>(T? value) where T : struct
 	{
-		/// <summary>Returns true if null or equals the default value.</summary>
+		/// <summary>Returns true if null or equals the default value. Null-safe.</summary>
+		/// <remarks>Short form of <c>IsNullOrDefault</c>.</remarks>
 		public bool IsDefault => value == null || EqualityComparer<T>.Default.Equals(value.Value, default);
 
-		/// <summary>Returns true if not null and not equal to the default value.</summary>
-		public bool NotDefault => value != null && !EqualityComparer<T>.Default.Equals(value.Value, default);
-
 		/// <summary>Returns true if null or equals the default value.</summary>
+		/// <remarks>Full-name alias for <c>IsDefault</c>.</remarks>
 		public bool IsNullOrDefault => value == null || EqualityComparer<T>.Default.Equals(value.Value, default);
 
+		/// <summary>Returns true if not null and not equal to the default value. Null-safe.</summary>
+		/// <remarks>Short form of <c>NotNullOrDefault</c>.</remarks>
+		public bool NotDefault => value != null && !EqualityComparer<T>.Default.Equals(value.Value, default);
+
 		/// <summary>Returns true if not null and not equal to the default value.</summary>
+		/// <remarks>Full-name alias for <c>NotDefault</c>.</remarks>
 		public bool NotNullOrDefault => value != null && !EqualityComparer<T>.Default.Equals(value.Value, default);
 
 		/// <summary>Returns null if null or equals the default value, else returns the value.</summary>
 		public T? NullIfDefault => (value == null || EqualityComparer<T>.Default.Equals(value.Value, default)) ? null : value;
 
-
-
-		// --- check...
-
-		/// <summary>Returns the value if not null, else default if null.</summary>
+		/// <summary>Returns the value if not null, otherwise returns default.</summary>
+		/// <remarks>Extension-property equivalent of the framework's <c>Nullable{T}.GetValueOrDefault()</c>.</remarks>
 		public T ValueOrDefault => value ?? default;
 
-		/// <summary>Returns the value if it is set (not null and not default), else returns input 'or' value.</summary>
+		/// <summary>Returns value if not null or default, otherwise returns <c>alt</c>.</summary>
 		public T ValueOr(T alt) => value == null || EqualityComparer<T>.Default.Equals(value.Value, default) ? alt : value.Value;
 	}
 }

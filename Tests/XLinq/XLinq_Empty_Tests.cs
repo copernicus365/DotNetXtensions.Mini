@@ -88,30 +88,60 @@ public class XLinq_Empty_Tests
 
 	#endregion
 
-	#region --- ValueIfDefault ---
+	#region --- ValueOr (struct) ---
 
 	[Theory]
 	[InlineData(0, 99, 99)]
 	[InlineData(5, 99, 5)]
 	[InlineData(-1, 99, -1)]
-	public void ValueIfDefault_Int(int input, int fallback, int expected)
-		=> Equal(expected, input.ValueIfDefault(fallback));
+	public void ValueOr_Int(int input, int fallback, int expected)
+		=> Equal(expected, input.ValueOr(fallback));
 
 	[Fact]
-	public void ValueIfDefault_Guid_Default_ReturnsFallback()
+	public void ValueOr_Guid_Default_ReturnsFallback()
 	{
 		Guid fallback = Guid.NewGuid();
-		Equal(fallback, Guid.Empty.ValueIfDefault(fallback));
+		Equal(fallback, Guid.Empty.ValueOr(fallback));
 	}
 
 	[Fact]
-	public void ValueIfDefault_Guid_NonDefault_ReturnsOriginal()
+	public void ValueOr_Guid_NonDefault_ReturnsOriginal()
 	{
 		Guid g = Guid.NewGuid();
 		Guid fallback = Guid.NewGuid();
 		NotEqual(g, fallback);
-		Equal(g, g.ValueIfDefault(fallback));
+		Equal(g, g.ValueOr(fallback));
 	}
+
+	#endregion
+
+	#region --- IsDefault / NotDefault (struct) ---
+
+	[Theory]
+	[InlineData(0, true)]
+	[InlineData(5, false)]
+	[InlineData(-1, false)]
+	public void IsDefault_Int(int input, bool expected)
+	{
+		Equal(expected, input.IsDefault);
+		Equal(!expected, input.NotDefault);
+	}
+
+	[Fact]
+	public void IsDefault_Guid_Empty_ReturnsTrue()
+		=> True(Guid.Empty.IsDefault);
+
+	[Fact]
+	public void IsDefault_Guid_NonEmpty_ReturnsFalse()
+		=> False(Guid.NewGuid().IsDefault);
+
+	[Fact]
+	public void IsDefault_char_Empty_ReturnsTrue()
+		=> True(char.MinValue.IsDefault);
+
+	[Fact]
+	public void IsDefault_char_NonEmpty_ReturnsFalse()
+		=> False('a'.IsDefault);
 
 	#endregion
 
@@ -365,6 +395,18 @@ public class XLinq_Empty_Tests
 	{
 		int? val = 5;
 		Equal(5, val.ValueOr(99));
+	}
+
+	[Theory]
+	[InlineData(null, true)]
+	[InlineData(0, true)]
+	[InlineData(5, false)]
+	public void NullIfDefault_NullableInt(int? input, bool expectNull)
+	{
+		int? result = input.NullIfDefault;
+		Equal(expectNull, result == null);
+		if(!expectNull)
+			Equal(input, result!.Value);
 	}
 
 	#endregion
