@@ -14,12 +14,15 @@ public static class PathX
 	public static string GetFullPath(string path)
 		=> CleanPath(Path.GetFullPath(path ?? ""));
 
+	/// <summary>Null-safe wrapper around <see cref="Path.GetDirectoryName(string)"/> that normalizes the result via <see cref="CleanPath"/>.</summary>
 	public static string GetDirectoryName(string path)
 		=> CleanPath(Path.GetDirectoryName(path ?? ""));
 
+	/// <summary>Normalizes a path by replacing backslashes with forward slashes and trimming whitespace; returns an empty string for null input.</summary>
 	public static string CleanPath(string path)
 		=> (path ?? "")?.TrimIfNeeded()?.Replace('\\', '/');
 
+	/// <summary>Combines two paths via <see cref="Path.Combine(string, string)"/> and normalizes the result via <see cref="CleanPath"/>; when <paramref name="trim"/> is true, trims each path before combining.</summary>
 	public static string PathCombine(string path1, string path2, bool trim = false)
 		=> CleanPath(trim ? Path.Combine(path1.TrimIfNeeded(), path2.TrimIfNeeded()) : Path.Combine(path1, path2));
 }
@@ -27,6 +30,9 @@ public static class PathX
 
 // ========== from file: XChar.cs ==========
 
+/// <summary>
+/// Extension methods for <see cref="char"/> — ASCII range checks and digit-to-int conversion.
+/// </summary>
 public static class XChar
 {
 	/// <summary>
@@ -37,7 +43,7 @@ public static class XChar
 		=> c < 58 && c > 47;
 
 	/// <summary>
-	/// Indicates whether the char is a lowercase ascii letter (a-z only).
+	/// Indicates whether the char is an ascii letter (a-z or A-Z only).
 	/// </summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsAsciiLetter(this char c)
@@ -78,23 +84,27 @@ public static class XChar
 	public static bool IsAsciiLetterOrDigit(this char c)
 		=> (c > 96 && c < 123) || (c > 64 && c < 91) || (c < 58 && c > 47);
 
-
+	/// <summary>Indicates whether the char is whitespace (delegates to <see cref="char.IsWhiteSpace(char)"/>).</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsWhitespace(this char c)
 		=> char.IsWhiteSpace(c);
 
+	/// <summary>Indicates whether the char is uppercase (delegates to <see cref="char.IsUpper(char)"/>).</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsUpper(this char c)
 		=> char.IsUpper(c);
 
+	/// <summary>Indicates whether the char is lowercase (delegates to <see cref="char.IsLower(char)"/>).</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsLower(this char c)
 		=> char.IsLower(c);
 
+	/// <summary>Indicates whether the char is a number (delegates to <see cref="char.IsNumber(char)"/>).</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsNumber(this char c)
 		=> char.IsNumber(c);
 
+	/// <summary>Converts an ascii digit char ('0'–'9') to its integer value. No validation — caller must ensure the char is a digit.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int ToInt(this char c)
 		=> c - '0';
@@ -154,12 +164,12 @@ public static partial class XDateTimes
 		=> new(value.UnixTimeSecondsToTicks(), offset ?? TimeSpan.Zero);
 
 
-	// ---
-	// --- partial: XDateTimes_OffsetConversions.cs (1) ---
-	// ---
+// ---
+// --- partial: XDateTimes_OffsetConversions.cs (1) ---
+// ---
 
 
-	/// <summary>
+/// <summary>
 	/// Convenience overload for converting to a new offset based on TimeZoneInfo.
 	/// Equivalent to <c>dt.ToOffset(tzi.GetUtcOffset(dt))</c>.
 	/// </summary>
@@ -174,11 +184,7 @@ public static partial class XDateTimes
 	public static DateTimeOffset ToOffsetSameUtc(this DateTimeOffset dt, TimeZoneInfo tzi)
 		=> __convertOffsetDTO_UTCFixed(dt, tzi.GetUtcOffset(dt));
 
-	/// <summary>
-	/// Converts to a new offset while representing the same moment in time (same UTC).
-	/// The existing offset is discarded, and the local DateTime adjusts to the new offset.
-	/// In a sense, is the opposite of <c>dt.ToOffset()</c>.
-	/// </summary>
+	/// <inheritdoc cref="ToOffsetSameUtc(DateTimeOffset, TimeZoneInfo)"/>
 	public static DateTimeOffset ToOffsetSameUtc(this DateTimeOffset dt, TimeSpan offset)
 		=> __convertOffsetDTO_UTCFixed(dt, offset);
 
@@ -210,10 +216,7 @@ public static partial class XDateTimes
 	public static DateTimeOffset ToDateTimeOffset(this DateTime dt, TimeSpan offset)
 		=> __ToDateTimeOffset(dt, offset, isUtc: false);
 
-	/// <summary>
-	/// Converts DateTime to DateTimeOffset, treating input as local time at the given timezone.
-	/// The DateTime ticks are preserved. DateTime.Kind is ignored.
-	/// </summary>
+	/// <inheritdoc cref="ToDateTimeOffset(DateTime, TimeSpan)"/>
 	public static DateTimeOffset ToDateTimeOffset(this DateTime dt, TimeZoneInfo tzi)
 		=> __ToDateTimeOffset(dt, tzi.GetUtcOffset(dt.ToUnspecifiedKindIfUtc()), isUtc: false);
 
@@ -224,24 +227,21 @@ public static partial class XDateTimes
 	public static DateTimeOffset ToDateTimeOffsetFromUtc(this DateTime dt, TimeSpan offset)
 		=> __ToDateTimeOffset(dt, offset, isUtc: true);
 
-	/// <summary>
-	/// Converts DateTime to DateTimeOffset, treating input as UTC time. The local DateTime
-	/// in the result is adjusted by the timezone offset. DateTime.Kind is ignored.
-	/// </summary>
+	/// <inheritdoc cref="ToDateTimeOffsetFromUtc(DateTime, TimeSpan)"/>
 	public static DateTimeOffset ToDateTimeOffsetFromUtc(this DateTime dt, TimeZoneInfo tzi)
 		=> __ToDateTimeOffset(dt, tzi.GetUtcOffset(dt.ToUnspecifiedKindIfUtc()), isUtc: true);
 
 
 	/// <summary>
-	/// Converts input DateTime to a new DateTimeOffset with the specified Offset value.
-	/// Importantly, the Kind property on the input DateTime *is ignored*
+	/// Converts input DateTime to a new DateTimeOffset with the specified Offset value. 
+	/// Importantly, the Kind property on the input DateTime *is ignored* 
 	/// (the framework unfortunately throws an exception if <c>dt.Kind == DateTimeKind.Utc</c>).
 	/// Set the <paramref name="isUtc"/> value to true (default is true) to indicate input DateTime is
 	/// already UTC time, or false to be treated as a local time (any non-UTC time).
 	/// </summary>
 	/// <param name="dt">DateTime</param>
 	/// <param name="offset">Offset</param>
-	/// <param name="isUtc">Indicates if the input DateTime is already a UTC value
+	/// <param name="isUtc">Indicates if the input DateTime is already a UTC value 
 	/// or else a Local value (any time that is not UTC).</param>
 	static DateTimeOffset __ToDateTimeOffset(DateTime dt, TimeSpan offset, bool isUtc = true)
 	{
@@ -285,12 +285,12 @@ public static partial class XDateTimes
 	static readonly long _maxDTTicks = DateTimeOffset.MaxValue.Ticks;
 
 
-	// ---
-	// --- partial: XDateTimes_Round.cs (2) ---
-	// ---
+// ---
+// --- partial: XDateTimes_Round.cs (2) ---
+// ---
 
 
-	// http://stackoverflow.com/questions/7029353/how-can-i-round-up-the-time-to-the-nearest-x-minutes
+// http://stackoverflow.com/questions/7029353/how-can-i-round-up-the-time-to-the-nearest-x-minutes
 
 	// --- Round ---
 
@@ -316,6 +316,7 @@ public static partial class XDateTimes
 	/// </summary>
 	/// <param name="dt">DateTimeOffset to round.</param>
 	/// <param name="roundBy">TimeSpan to round to.</param>
+	/// <inheritdoc cref="Round(DateTime, TimeSpan)"/>
 	public static DateTimeOffset Round(this DateTimeOffset dt, TimeSpan roundBy)
 	{
 		bool roundUp = _roundUp(dt.Ticks, roundBy);
@@ -330,12 +331,14 @@ public static partial class XDateTimes
 
 	// --- RoundUp ---
 
+	/// <summary>Rounds the DateTime up to the next multiple of <paramref name="d"/>; preserves <see cref="DateTime.Kind"/>.</summary>
 	public static DateTime RoundUp(this DateTime dt, TimeSpan d)
 	{
 		long delta = (d.Ticks - (dt.Ticks % d.Ticks)) % d.Ticks;
 		return new DateTime(dt.Ticks + delta, dt.Kind);
 	}
 
+	/// <inheritdoc cref="RoundUp(DateTime, TimeSpan)"/>
 	public static DateTimeOffset RoundUp(this DateTimeOffset dt, TimeSpan d)
 	{
 		long delta = (d.Ticks - (dt.Ticks % d.Ticks)) % d.Ticks;
@@ -344,12 +347,14 @@ public static partial class XDateTimes
 
 	// --- RoundDown ---
 
+	/// <summary>Rounds the DateTime down to the previous multiple of <paramref name="d"/>; preserves <see cref="DateTime.Kind"/>.</summary>
 	public static DateTime RoundDown(this DateTime dt, TimeSpan d)
 	{
 		long delta = dt.Ticks % d.Ticks;
 		return new DateTime(dt.Ticks - delta, dt.Kind);
 	}
 
+	/// <inheritdoc cref="RoundDown(DateTime, TimeSpan)"/>
 	public static DateTimeOffset RoundDown(this DateTimeOffset dt, TimeSpan d)
 	{
 		long delta = dt.Ticks % d.Ticks;
@@ -361,8 +366,16 @@ public static partial class XDateTimes
 
 // ========== from file: XDictionary_DictionariesAreEqual.cs ==========
 
+/// <summary>
+/// Extension methods for <see cref="IDictionary{TKey, TValue}"/>.
+/// </summary>
 public static partial class XDictionary
 {
+	/// <summary>
+	/// Returns true if both dictionaries are null, or both have the same keys with equal values.
+	/// An optional <paramref name="comparer"/> overrides the default <see cref="object.Equals(object)"/> value comparison.
+	/// Returns false if counts differ, any key is missing, or any value is unequal.
+	/// </summary>
 	public static bool DictionariesAreEqual<TKey, TValue>(
 		this IDictionary<TKey, TValue> dict1,
 		IDictionary<TKey, TValue> dict2,
@@ -405,6 +418,10 @@ public static partial class XDictionary
 // ---
 
 
+/// <summary>
+/// Extension methods for strings, arrays, collections, and generic types — null-safe empty/default checks,
+/// null-coalescing helpers, and conditional LINQ operators.
+/// </summary>
 public static partial class XLinq
 {
 	// --- string ---
@@ -570,29 +587,29 @@ public static partial class XLinq
 	}
 
 
-	// ---
-	// --- partial: XLinq_IfLinq.cs (1) ---
-	// ---
+// ---
+// --- partial: XLinq_IfLinq.cs (1) ---
+// ---
 
 
-	// --- WhereIf ---
+// --- WhereIf ---
 
-	/// <summary>Applies Where filter if condition is true.</summary>
+	/// <summary>Applies <paramref name="predicate"/> as a Where filter when <paramref name="condition"/> is true; returns <paramref name="source"/> unchanged otherwise. Null-safe.</summary>
 	[DebuggerStepThrough]
 	public static IEnumerable<T> WhereIf<T>(this IEnumerable<T> source, bool condition, Func<T, bool> predicate)
 		=> !condition ? source : source?.Where(predicate);
 
-	/// <summary>Applies indexed Where filter if condition is true.</summary>
+	/// <inheritdoc cref="WhereIf{T}(IEnumerable{T}, bool, Func{T, bool})"/>
 	[DebuggerStepThrough]
 	public static IEnumerable<T> WhereIf<T>(this IEnumerable<T> source, bool condition, Func<T, int, bool> predicate)
 		=> !condition ? source : source?.Where(predicate);
 
-	/// <summary>Applies Where filter if condition is true.</summary>
+	/// <inheritdoc cref="WhereIf{T}(IEnumerable{T}, bool, Func{T, bool})"/>
 	[DebuggerStepThrough]
 	public static IQueryable<T> WhereIf<T>(this IQueryable<T> source, bool condition, Expression<Func<T, bool>> predicate)
 		=> !condition ? source : source?.Where(predicate);
 
-	/// <summary>Applies indexed Where filter if condition is true.</summary>
+	/// <inheritdoc cref="WhereIf{T}(IEnumerable{T}, bool, Func{T, bool})"/>
 	[DebuggerStepThrough]
 	public static IQueryable<T> WhereIf<T>(this IQueryable<T> source, bool condition, Expression<Func<T, int, bool>> predicate)
 		=> !condition ? source : source?.Where(predicate);
@@ -600,22 +617,22 @@ public static partial class XLinq
 
 	// --- WhereIfElse ---
 
-	/// <summary>Applies one of two Where filters based on condition.</summary>
+	/// <summary>Applies <paramref name="predicateIf"/> when <paramref name="condition"/> is true, <paramref name="predicateElse"/> otherwise. Null-safe.</summary>
 	[DebuggerStepThrough]
 	public static IEnumerable<T> WhereIfElse<T>(this IEnumerable<T> source, bool condition, Func<T, bool> predicateIf, Func<T, bool> predicateElse)
 		=> condition ? source?.Where(predicateIf) : source?.Where(predicateElse);
 
-	/// <summary>Applies one of two indexed Where filters based on condition.</summary>
+	/// <inheritdoc cref="WhereIfElse{T}(IEnumerable{T}, bool, Func{T, bool}, Func{T, bool})"/>
 	[DebuggerStepThrough]
 	public static IEnumerable<T> WhereIfElse<T>(this IEnumerable<T> source, bool condition, Func<T, int, bool> predicateIf, Func<T, int, bool> predicateElse)
 		=> condition ? source?.Where(predicateIf) : source?.Where(predicateElse);
 
-	/// <summary>Applies one of two Where filters based on condition.</summary>
+	/// <inheritdoc cref="WhereIfElse{T}(IEnumerable{T}, bool, Func{T, bool}, Func{T, bool})"/>
 	[DebuggerStepThrough]
 	public static IQueryable<T> WhereIfElse<T>(this IQueryable<T> source, bool condition, Expression<Func<T, bool>> predicateIf, Expression<Func<T, bool>> predicateElse)
 		=> condition ? source?.Where(predicateIf) : source?.Where(predicateElse);
 
-	/// <summary>Applies one of two indexed Where filters based on condition.</summary>
+	/// <inheritdoc cref="WhereIfElse{T}(IEnumerable{T}, bool, Func{T, bool}, Func{T, bool})"/>
 	[DebuggerStepThrough]
 	public static IQueryable<T> WhereIfElse<T>(this IQueryable<T> source, bool condition, Expression<Func<T, int, bool>> predicateIf, Expression<Func<T, int, bool>> predicateElse)
 		=> condition ? source?.Where(predicateIf) : source?.Where(predicateElse);
@@ -623,12 +640,12 @@ public static partial class XLinq
 
 	// --- SkipIf ---
 
-	/// <summary>Skips elements if condition is true.</summary>
+	/// <summary>Skips <paramref name="count"/> elements when <paramref name="condition"/> is true; returns <paramref name="source"/> unchanged otherwise. Null-safe.</summary>
 	[DebuggerStepThrough]
 	public static IEnumerable<T> SkipIf<T>(this IEnumerable<T> source, bool condition, int count)
 		=> !condition ? source : source?.Skip(count);
 
-	/// <summary>Skips elements if condition is true.</summary>
+	/// <inheritdoc cref="SkipIf{T}(IEnumerable{T}, bool, int)"/>
 	[DebuggerStepThrough]
 	public static IQueryable<T> SkipIf<T>(this IQueryable<T> source, bool condition, int count)
 		=> !condition ? source : source?.Skip(count);
@@ -636,12 +653,12 @@ public static partial class XLinq
 
 	// --- TakeIf ---
 
-	/// <summary>Takes elements if condition is true.</summary>
+	/// <summary>Takes <paramref name="count"/> elements when <paramref name="condition"/> is true; returns <paramref name="source"/> unchanged otherwise. Null-safe.</summary>
 	[DebuggerStepThrough]
 	public static IEnumerable<T> TakeIf<T>(this IEnumerable<T> source, bool condition, int count)
 		=> !condition ? source : source?.Take(count);
 
-	/// <summary>Takes elements if condition is true.</summary>
+	/// <inheritdoc cref="TakeIf{T}(IEnumerable{T}, bool, int)"/>
 	[DebuggerStepThrough]
 	public static IQueryable<T> TakeIf<T>(this IQueryable<T> source, bool condition, int count)
 		=> !condition ? source : source?.Take(count);
@@ -649,26 +666,28 @@ public static partial class XLinq
 
 	// --- SkipTakeIf ---
 
-	/// <summary>Skips then takes elements if condition is true.</summary>
+	/// <summary>Skips <paramref name="skip"/> then takes <paramref name="count"/> elements when <paramref name="condition"/> is true; returns <paramref name="source"/> unchanged otherwise. Null-safe.</summary>
 	[DebuggerStepThrough]
 	public static IEnumerable<T> SkipTakeIf<T>(this IEnumerable<T> source, bool condition, int skip, int count)
 		=> !condition ? source : source?.Skip(skip).Take(count);
 
-	/// <summary>Skips then takes elements if condition is true.</summary>
+	/// <inheritdoc cref="SkipTakeIf{T}(IEnumerable{T}, bool, int, int)"/>
 	[DebuggerStepThrough]
 	public static IQueryable<T> SkipTakeIf<T>(this IQueryable<T> source, bool condition, int skip, int count)
 		=> !condition ? source : source?.Skip(skip).Take(count);
 
 
-	// ---
-	// --- partial: XLinq_JoinToString.cs (2) ---
-	// ---
+// ---
+// --- partial: XLinq_JoinToString.cs (2) ---
+// ---
 
 
+/// <summary>Joins the elements of <paramref name="source"/> into a string using <paramref name="separator"/>; returns null if source is null.</summary>
 	[DebuggerStepThrough]
 	public static string JoinToString<T>(this IEnumerable<T> source, string separator = ",")
-			=> source == null ? null : string.Join(separator, source);
+		=> source == null ? null : string.Join(separator, source);
 
+	/// <inheritdoc cref="JoinToString{T}(IEnumerable{T}, string)"/>
 	[DebuggerStepThrough]
 	public static string JoinToString<T>(this IEnumerable<T> source, Func<T, string> selector, string separator = ",")
 		=> source == null ? null : string.Join(separator, source.Select(selector));
@@ -678,49 +697,62 @@ public static partial class XLinq
 
 // ========== from file: XNumber_InRange.cs ==========
 
+/// <summary>
+/// Extension methods for numeric types — inclusive range checks.
+/// </summary>
 public static partial class XNumber
 {
 	// --- InRange / NotInRange ---
 
+	/// <summary>Returns true if <paramref name="val"/> is within the inclusive range [<paramref name="val1"/>, <paramref name="val2"/>].</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool InRange<T>(this T val, T val1, T val2)
 		where T : INumber<T>, IComparisonOperators<T, T, bool>
 		=> val >= val1 && val <= val2;
 
+	/// <summary>Returns true if <paramref name="val"/> is outside the inclusive range [<paramref name="val1"/>, <paramref name="val2"/>].</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool NotInRange<T>(this T val, T val1, T val2)
 		where T : INumber<T>, IComparisonOperators<T, T, bool>
 		=> val < val1 || val > val2;
 
+	/// <summary>Returns true if <paramref name="val"/> is non-null and its length is within the inclusive range [<paramref name="val1"/>, <paramref name="val2"/>].</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool LengthInRange(this string val, int val1, int val2)
 		=> val != null && val.Length.InRange(val1, val2);
 
+	/// <summary>Returns true if <paramref name="val"/> is non-null and its length is outside the inclusive range [<paramref name="val1"/>, <paramref name="val2"/>].</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool LengthNotInRange(this string val, int val1, int val2)
 		=> val != null && val.Length.NotInRange(val1, val2);
 
 
+	/// <inheritdoc cref="InRange{T}(T, T, T)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool InRange(this TimeSpan val, TimeSpan val1, TimeSpan val2)
 		=> val >= val1 && val <= val2;
 
+	/// <inheritdoc cref="NotInRange{T}(T, T, T)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool NotInRange(this TimeSpan val, TimeSpan val1, TimeSpan val2)
 		=> val < val1 || val > val2;
 
+	/// <inheritdoc cref="InRange{T}(T, T, T)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool InRange(this DateTime val, DateTime val1, DateTime val2)
 		=> val >= val1 && val <= val2;
 
+	/// <inheritdoc cref="NotInRange{T}(T, T, T)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool NotInRange(this DateTime val, DateTime val1, DateTime val2)
 		=> val < val1 || val > val2;
 
+	/// <inheritdoc cref="InRange{T}(T, T, T)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool InRange(this DateTimeOffset val, DateTimeOffset val1, DateTimeOffset val2)
 		=> val >= val1 && val <= val2;
 
+	/// <inheritdoc cref="NotInRange{T}(T, T, T)"/>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool NotInRange(this DateTimeOffset val, DateTimeOffset val1, DateTimeOffset val2)
 		=> val < val1 || val > val2;
@@ -917,6 +949,7 @@ public static partial class XString
 {
 	// maybe a mistake adding this ... hmmm
 
+	/// <summary>Writes the string to <see cref="Console.WriteLine(string)"/> and returns it unchanged, for fluent/debug use.</summary>
 	[DebuggerStepThrough]
 	public static string Print(this string s)
 	{
@@ -924,18 +957,20 @@ public static partial class XString
 		return s;
 	}
 
+	/// <summary>Writes the object to <see cref="Console.Write(object)"/>.</summary>
 	[DebuggerStepThrough]
 	public static void Print(this object obj)
 		=> Console.Write(obj);
 
 
-	// ---
-	// --- partial: XString_SubstringMax.cs (1) ---
-	// ---
+// ---
+// --- partial: XString_SubstringMax.cs (1) ---
+// ---
 
 
+/// <inheritdoc cref="SubstringMax(string, int, int, string, bool)"/>
 	public static string SubstringMax(this string str, int maxLength, string ellipsis = null, bool tryBreakOnWord = false)
-			=> SubstringMax(str, 0, maxLength, ellipsis: ellipsis, tryBreakOnWord: tryBreakOnWord);
+		=> SubstringMax(str, 0, maxLength, ellipsis: ellipsis, tryBreakOnWord: tryBreakOnWord);
 
 	/// <summary>
 	/// Returns a substring of the input string where instead of specifying
@@ -1003,27 +1038,32 @@ public static partial class XString
 	}
 
 
-	// ---
-	// --- partial: XString_ToValue.cs (2) ---
-	// ---
+// ---
+// --- partial: XString_ToValue.cs (2) ---
+// ---
 
 
+/// <summary>Parses the string as an int; returns <paramref name="dflt"/> if parsing fails.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int ToInt(this string val, int dflt = 0)
-			=> int.TryParse(val, out int v) ? v : dflt;
+		=> int.TryParse(val, out int v) ? v : dflt;
 
+	/// <summary>Parses the string as a long; returns <paramref name="dflt"/> if parsing fails.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static long ToLong(this string val, long dflt = 0)
 		=> long.TryParse(val, out long v) ? v : dflt;
 
+	/// <summary>Parses the string as a decimal; returns <paramref name="dflt"/> if parsing fails.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static decimal ToDecimal(this string val, decimal dflt = 0)
 		=> decimal.TryParse(val, out decimal v) ? v : dflt;
 
+	/// <summary>Parses the string as a double; returns <paramref name="dflt"/> if parsing fails.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static double ToDouble(this string val, double dflt = 0)
 		=> double.TryParse(val, out double v) ? v : dflt;
 
+	/// <summary>Parses the string as a bool; also accepts "0" (false) and "1" (true). Returns <paramref name="dflt"/> if parsing fails.</summary>
 	public static bool ToBool(this string val, bool dflt = false)
 	{
 		if(val.NotEmpty) {
@@ -1038,6 +1078,10 @@ public static partial class XString
 		return dflt;
 	}
 
+	/// <summary>
+	/// Parses the string as a <see cref="DateTime"/> via <see cref="DateTimeOffset.TryParse(string, out DateTimeOffset)"/>;
+	/// returns <paramref name="defaultVal"/> or <see cref="DateTime.MinValue"/> on failure.
+	/// </summary>
 	public static DateTime ToDateTime(this string val, DateTime? defaultVal = null)
 	{
 		if(val.NotEmpty) {
@@ -1050,57 +1094,68 @@ public static partial class XString
 		return defaultVal ?? DateTime.MinValue;
 	}
 
+	/// <summary>Parses the string as a <see cref="DateTimeOffset"/>; returns <paramref name="dflt"/> or <see cref="DateTimeOffset.MinValue"/> on failure.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static DateTimeOffset ToDateTimeOffset(this string val, DateTimeOffset? dflt = null)
 		=> DateTimeOffset.TryParse(val, out DateTimeOffset v) ? v : (dflt ?? DateTimeOffset.MinValue);
 
+	/// <summary>Parses the string as a <see cref="Guid"/>; returns <paramref name="dflt"/> or <see langword="default"/> on failure.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static Guid ToGuid(this string val, Guid? dflt = null)
 		=> Guid.TryParse(val, out Guid v) ? v : (dflt ?? default);
 
 
 
+	/// <summary>Parses the string as a nullable int; returns <see langword="null"/> if empty or parsing fails.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int? ToIntN(this string val)
 		=> val.NotEmpty && int.TryParse(val, out int v) ? v : null;
 
+	/// <summary>Parses the string as a nullable long; returns <see langword="null"/> if empty or parsing fails.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static long? ToLongN(this string val)
 		=> val.NotEmpty && long.TryParse(val, out long v) ? v : null;
 
+	/// <summary>Parses the string as a nullable decimal; returns <see langword="null"/> if empty or parsing fails.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static decimal? ToDecimalN(this string val)
 		=> val.NotEmpty && decimal.TryParse(val, out decimal v) ? v : null;
 
+	/// <summary>Parses the string as a nullable double; returns <see langword="null"/> if empty or parsing fails.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static double? ToDoubleN(this string val)
 		=> val.NotEmpty && double.TryParse(val, out double v) ? v : null;
 
+	/// <summary>Parses the string as a nullable bool (also accepts "0"/"1"); returns <see langword="null"/> if empty.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool? ToBoolN(this string val)
 		=> val.IsEmpty ? null : ToBool(val); // must use ToBool, handles numeric...
 
+	/// <summary>Parses the string as a nullable <see cref="DateTime"/> (via <see cref="DateTimeOffset.TryParse(string, out DateTimeOffset)"/>); returns <see langword="null"/> if empty or parsing fails.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static DateTime? ToDateTimeN(this string val)
 		=> val.NotEmpty && DateTimeOffset.TryParse(val, out DateTimeOffset v) // see notes above: ToDateTime()
 		? v.DateTime : null;
 
+	/// <summary>Parses the string as a nullable <see cref="DateTimeOffset"/>; returns <see langword="null"/> if empty or parsing fails.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static DateTimeOffset? ToDateTimeOffsetN(this string val)
 		=> val.NotEmpty && DateTimeOffset.TryParse(val, out DateTimeOffset v) ? v : null;
 
+	/// <summary>Parses the string as a nullable <see cref="Guid"/>; returns <see langword="null"/> if empty or parsing fails.</summary>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static Guid? ToGuidN(this string val)
 		=> val.NotEmpty && Guid.TryParse(val, out Guid v) ? v : null;
 
 
-	// ---
-	// --- partial: XString_Trim.cs (3) ---
-	// ---
+// ---
+// --- partial: XString_Trim.cs (3) ---
+// ---
 
 
-	extension(string s)
+extension(string s)
 	{
+		/// <summary>True if the string is non-null, non-empty, and has leading or trailing whitespace.</summary>
 		public bool IsTrimmable
 			=> s != null && s.Length > 0 && (char.IsWhiteSpace(s[0]) || char.IsWhiteSpace(s[^1]));
 
@@ -1114,6 +1169,8 @@ public static partial class XString
 			return s;
 		}
 
+		/// <summary>Trims the string; returns null if null, empty, or whitespace-only.
+		/// *No* trimming happens if non-needed, in which case same string is returned</summary>
 		[DebuggerStepThrough]
 		public string TrimToNull()
 		{
