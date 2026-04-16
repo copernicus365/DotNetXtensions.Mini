@@ -28,6 +28,7 @@ public static partial class XDateTimes
 	/// </summary>
 	/// <param name="dt">DateTimeOffset to round.</param>
 	/// <param name="roundBy">TimeSpan to round to.</param>
+	/// <inheritdoc cref="Round(DateTime, TimeSpan)"/>
 	public static DateTimeOffset Round(this DateTimeOffset dt, TimeSpan roundBy)
 	{
 		bool roundUp = _roundUp(dt.Ticks, roundBy);
@@ -42,12 +43,14 @@ public static partial class XDateTimes
 
 	// --- RoundUp ---
 
+	/// <summary>Rounds the DateTime up to the next multiple of <paramref name="d"/>; preserves <see cref="DateTime.Kind"/>.</summary>
 	public static DateTime RoundUp(this DateTime dt, TimeSpan d)
 	{
 		long delta = (d.Ticks - (dt.Ticks % d.Ticks)) % d.Ticks;
 		return new DateTime(dt.Ticks + delta, dt.Kind);
 	}
 
+	/// <inheritdoc cref="RoundUp(DateTime, TimeSpan)"/>
 	public static DateTimeOffset RoundUp(this DateTimeOffset dt, TimeSpan d)
 	{
 		long delta = (d.Ticks - (dt.Ticks % d.Ticks)) % d.Ticks;
@@ -56,12 +59,14 @@ public static partial class XDateTimes
 
 	// --- RoundDown ---
 
+	/// <summary>Rounds the DateTime down to the previous multiple of <paramref name="d"/>; preserves <see cref="DateTime.Kind"/>.</summary>
 	public static DateTime RoundDown(this DateTime dt, TimeSpan d)
 	{
 		long delta = dt.Ticks % d.Ticks;
 		return new DateTime(dt.Ticks - delta, dt.Kind);
 	}
 
+	/// <inheritdoc cref="RoundDown(DateTime, TimeSpan)"/>
 	public static DateTimeOffset RoundDown(this DateTimeOffset dt, TimeSpan d)
 	{
 		long delta = dt.Ticks % d.Ticks;

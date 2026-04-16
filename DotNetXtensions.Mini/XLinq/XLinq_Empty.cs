@@ -1,5 +1,9 @@
 namespace DotNetXtensions;
 
+/// <summary>
+/// Extension methods for strings, arrays, collections, and generic types — null-safe empty/default checks,
+/// null-coalescing helpers, and conditional LINQ operators.
+/// </summary>
 public static partial class XLinq
 {
 	// --- string ---

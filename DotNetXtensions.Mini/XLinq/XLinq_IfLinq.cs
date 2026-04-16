@@ -6,22 +6,22 @@ public static partial class XLinq
 {
 	// --- WhereIf ---
 
-	/// <summary>Applies Where filter if condition is true.</summary>
+	/// <summary>Applies <paramref name="predicate"/> as a Where filter when <paramref name="condition"/> is true; returns <paramref name="source"/> unchanged otherwise. Null-safe.</summary>
 	[DebuggerStepThrough]
 	public static IEnumerable<T> WhereIf<T>(this IEnumerable<T> source, bool condition, Func<T, bool> predicate)
 		=> !condition ? source : source?.Where(predicate);
 
-	/// <summary>Applies indexed Where filter if condition is true.</summary>
+	/// <inheritdoc cref="WhereIf{T}(IEnumerable{T}, bool, Func{T, bool})"/>
 	[DebuggerStepThrough]
 	public static IEnumerable<T> WhereIf<T>(this IEnumerable<T> source, bool condition, Func<T, int, bool> predicate)
 		=> !condition ? source : source?.Where(predicate);
 
-	/// <summary>Applies Where filter if condition is true.</summary>
+	/// <inheritdoc cref="WhereIf{T}(IEnumerable{T}, bool, Func{T, bool})"/>
 	[DebuggerStepThrough]
 	public static IQueryable<T> WhereIf<T>(this IQueryable<T> source, bool condition, Expression<Func<T, bool>> predicate)
 		=> !condition ? source : source?.Where(predicate);
 
-	/// <summary>Applies indexed Where filter if condition is true.</summary>
+	/// <inheritdoc cref="WhereIf{T}(IEnumerable{T}, bool, Func{T, bool})"/>
 	[DebuggerStepThrough]
 	public static IQueryable<T> WhereIf<T>(this IQueryable<T> source, bool condition, Expression<Func<T, int, bool>> predicate)
 		=> !condition ? source : source?.Where(predicate);
@@ -29,22 +29,22 @@ public static partial class XLinq
 
 	// --- WhereIfElse ---
 
-	/// <summary>Applies one of two Where filters based on condition.</summary>
+	/// <summary>Applies <paramref name="predicateIf"/> when <paramref name="condition"/> is true, <paramref name="predicateElse"/> otherwise. Null-safe.</summary>
 	[DebuggerStepThrough]
 	public static IEnumerable<T> WhereIfElse<T>(this IEnumerable<T> source, bool condition, Func<T, bool> predicateIf, Func<T, bool> predicateElse)
 		=> condition ? source?.Where(predicateIf) : source?.Where(predicateElse);
 
-	/// <summary>Applies one of two indexed Where filters based on condition.</summary>
+	/// <inheritdoc cref="WhereIfElse{T}(IEnumerable{T}, bool, Func{T, bool}, Func{T, bool})"/>
 	[DebuggerStepThrough]
 	public static IEnumerable<T> WhereIfElse<T>(this IEnumerable<T> source, bool condition, Func<T, int, bool> predicateIf, Func<T, int, bool> predicateElse)
 		=> condition ? source?.Where(predicateIf) : source?.Where(predicateElse);
 
-	/// <summary>Applies one of two Where filters based on condition.</summary>
+	/// <inheritdoc cref="WhereIfElse{T}(IEnumerable{T}, bool, Func{T, bool}, Func{T, bool})"/>
 	[DebuggerStepThrough]
 	public static IQueryable<T> WhereIfElse<T>(this IQueryable<T> source, bool condition, Expression<Func<T, bool>> predicateIf, Expression<Func<T, bool>> predicateElse)
 		=> condition ? source?.Where(predicateIf) : source?.Where(predicateElse);
 
-	/// <summary>Applies one of two indexed Where filters based on condition.</summary>
+	/// <inheritdoc cref="WhereIfElse{T}(IEnumerable{T}, bool, Func{T, bool}, Func{T, bool})"/>
 	[DebuggerStepThrough]
 	public static IQueryable<T> WhereIfElse<T>(this IQueryable<T> source, bool condition, Expression<Func<T, int, bool>> predicateIf, Expression<Func<T, int, bool>> predicateElse)
 		=> condition ? source?.Where(predicateIf) : source?.Where(predicateElse);
@@ -52,12 +52,12 @@ public static partial class XLinq
 
 	// --- SkipIf ---
 
-	/// <summary>Skips elements if condition is true.</summary>
+	/// <summary>Skips <paramref name="count"/> elements when <paramref name="condition"/> is true; returns <paramref name="source"/> unchanged otherwise. Null-safe.</summary>
 	[DebuggerStepThrough]
 	public static IEnumerable<T> SkipIf<T>(this IEnumerable<T> source, bool condition, int count)
 		=> !condition ? source : source?.Skip(count);
 
-	/// <summary>Skips elements if condition is true.</summary>
+	/// <inheritdoc cref="SkipIf{T}(IEnumerable{T}, bool, int)"/>
 	[DebuggerStepThrough]
 	public static IQueryable<T> SkipIf<T>(this IQueryable<T> source, bool condition, int count)
 		=> !condition ? source : source?.Skip(count);
@@ -65,12 +65,12 @@ public static partial class XLinq
 
 	// --- TakeIf ---
 
-	/// <summary>Takes elements if condition is true.</summary>
+	/// <summary>Takes <paramref name="count"/> elements when <paramref name="condition"/> is true; returns <paramref name="source"/> unchanged otherwise. Null-safe.</summary>
 	[DebuggerStepThrough]
 	public static IEnumerable<T> TakeIf<T>(this IEnumerable<T> source, bool condition, int count)
 		=> !condition ? source : source?.Take(count);
 
-	/// <summary>Takes elements if condition is true.</summary>
+	/// <inheritdoc cref="TakeIf{T}(IEnumerable{T}, bool, int)"/>
 	[DebuggerStepThrough]
 	public static IQueryable<T> TakeIf<T>(this IQueryable<T> source, bool condition, int count)
 		=> !condition ? source : source?.Take(count);
@@ -78,12 +78,12 @@ public static partial class XLinq
 
 	// --- SkipTakeIf ---
 
-	/// <summary>Skips then takes elements if condition is true.</summary>
+	/// <summary>Skips <paramref name="skip"/> then takes <paramref name="count"/> elements when <paramref name="condition"/> is true; returns <paramref name="source"/> unchanged otherwise. Null-safe.</summary>
 	[DebuggerStepThrough]
 	public static IEnumerable<T> SkipTakeIf<T>(this IEnumerable<T> source, bool condition, int skip, int count)
 		=> !condition ? source : source?.Skip(skip).Take(count);
 
-	/// <summary>Skips then takes elements if condition is true.</summary>
+	/// <inheritdoc cref="SkipTakeIf{T}(IEnumerable{T}, bool, int, int)"/>
 	[DebuggerStepThrough]
 	public static IQueryable<T> SkipTakeIf<T>(this IQueryable<T> source, bool condition, int skip, int count)
 		=> !condition ? source : source?.Skip(skip).Take(count);

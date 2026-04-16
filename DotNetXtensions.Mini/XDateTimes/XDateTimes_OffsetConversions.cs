@@ -1,5 +1,9 @@
 namespace DotNetXtensions;
 
+/// <summary>
+/// Extension methods for <see cref="DateTime"/> and <see cref="DateTimeOffset"/> — Unix epoch conversions,
+/// offset/timezone conversions, and rounding.
+/// </summary>
 public static partial class XDateTimes
 {
 	/// <summary>
@@ -17,11 +21,7 @@ public static partial class XDateTimes
 	public static DateTimeOffset ToOffsetSameUtc(this DateTimeOffset dt, TimeZoneInfo tzi)
 		=> __convertOffsetDTO_UTCFixed(dt, tzi.GetUtcOffset(dt));
 
-	/// <summary>
-	/// Converts to a new offset while representing the same moment in time (same UTC).
-	/// The existing offset is discarded, and the local DateTime adjusts to the new offset.
-	/// In a sense, is the opposite of <c>dt.ToOffset()</c>.
-	/// </summary>
+	/// <inheritdoc cref="ToOffsetSameUtc(DateTimeOffset, TimeZoneInfo)"/>
 	public static DateTimeOffset ToOffsetSameUtc(this DateTimeOffset dt, TimeSpan offset)
 		=> __convertOffsetDTO_UTCFixed(dt, offset);
 
@@ -53,10 +53,7 @@ public static partial class XDateTimes
 	public static DateTimeOffset ToDateTimeOffset(this DateTime dt, TimeSpan offset)
 		=> __ToDateTimeOffset(dt, offset, isUtc: false);
 
-	/// <summary>
-	/// Converts DateTime to DateTimeOffset, treating input as local time at the given timezone.
-	/// The DateTime ticks are preserved. DateTime.Kind is ignored.
-	/// </summary>
+	/// <inheritdoc cref="ToDateTimeOffset(DateTime, TimeSpan)"/>
 	public static DateTimeOffset ToDateTimeOffset(this DateTime dt, TimeZoneInfo tzi)
 		=> __ToDateTimeOffset(dt, tzi.GetUtcOffset(dt.ToUnspecifiedKindIfUtc()), isUtc: false);
 
@@ -67,10 +64,7 @@ public static partial class XDateTimes
 	public static DateTimeOffset ToDateTimeOffsetFromUtc(this DateTime dt, TimeSpan offset)
 		=> __ToDateTimeOffset(dt, offset, isUtc: true);
 
-	/// <summary>
-	/// Converts DateTime to DateTimeOffset, treating input as UTC time. The local DateTime
-	/// in the result is adjusted by the timezone offset. DateTime.Kind is ignored.
-	/// </summary>
+	/// <inheritdoc cref="ToDateTimeOffsetFromUtc(DateTime, TimeSpan)"/>
 	public static DateTimeOffset ToDateTimeOffsetFromUtc(this DateTime dt, TimeZoneInfo tzi)
 		=> __ToDateTimeOffset(dt, tzi.GetUtcOffset(dt.ToUnspecifiedKindIfUtc()), isUtc: true);
 

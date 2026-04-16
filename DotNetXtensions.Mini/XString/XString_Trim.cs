@@ -1,9 +1,13 @@
 namespace DotNetXtensions;
 
+/// <summary>
+/// Extension methods for <see cref="string"/> — trim helpers, substring utilities, type parsing, and print utilities.
+/// </summary>
 public static partial class XString
 {
 	extension(string s)
 	{
+		/// <summary>True if the string is non-null, non-empty, and has leading or trailing whitespace.</summary>
 		public bool IsTrimmable
 			=> s != null && s.Length > 0 && (char.IsWhiteSpace(s[0]) || char.IsWhiteSpace(s[^1]));
 
@@ -17,6 +21,8 @@ public static partial class XString
 			return s;
 		}
 
+		/// <summary>Trims the string; returns null if null, empty, or whitespace-only.
+		/// *No* trimming happens if non-needed, in which case same string is returned</summary>
 		[DebuggerStepThrough]
 		public string TrimToNull()
 		{

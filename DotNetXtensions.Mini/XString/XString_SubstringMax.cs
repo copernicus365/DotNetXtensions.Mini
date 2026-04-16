@@ -2,6 +2,7 @@ namespace DotNetXtensions;
 
 public static partial class XString
 {
+	/// <inheritdoc cref="SubstringMax(string, int, int, string, bool)"/>
 	public static string SubstringMax(this string str, int maxLength, string ellipsis = null, bool tryBreakOnWord = false)
 		=> SubstringMax(str, 0, maxLength, ellipsis: ellipsis, tryBreakOnWord: tryBreakOnWord);
 

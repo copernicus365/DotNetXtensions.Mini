@@ -1,7 +1,15 @@
 namespace DotNetXtensions;
 
+/// <summary>
+/// Extension methods for <see cref="IDictionary{TKey, TValue}"/>.
+/// </summary>
 public static partial class XDictionary
 {
+	/// <summary>
+	/// Returns true if both dictionaries are null, or both have the same keys with equal values.
+	/// An optional <paramref name="comparer"/> overrides the default <see cref="object.Equals(object)"/> value comparison.
+	/// Returns false if counts differ, any key is missing, or any value is unequal.
+	/// </summary>
 	public static bool DictionariesAreEqual<TKey, TValue>(
 		this IDictionary<TKey, TValue> dict1,
 		IDictionary<TKey, TValue> dict2,
