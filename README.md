@@ -97,13 +97,9 @@ string result = padded.TrimToNull(); // null (trimmed to empty → null)
 ```
 
 #### String Utilities
-- **`ContainsIgnoreCase()`** - Case-insensitive contains check
 - **`LengthN`** / **`CountN`** - Returns length/count or 0 if null (properties)
 
 ```csharp
-string str = "Hello World";
-bool contains = str.ContainsIgnoreCase("WORLD"); // true
-
 string nullStr = null;
 int length = nullStr.LengthN; // 0
 ```
@@ -293,7 +289,7 @@ if (temp.NotInRange(20.0, 30.0)) // true
     WriteLine("Outside comfort zone");
 
 string name = "John";
-if (name.InRange(1, 50)) // true (checks length)
+if (name.LengthInRange(1, 50)) // true (checks length)
     WriteLine("Valid name length");
 ```
 
